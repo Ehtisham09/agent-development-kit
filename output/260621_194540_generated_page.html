@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning Engineering Interview Preparation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            font-size: 1.8em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        .topic {
+            background-color: #ecf0f1;
+            border-left: 5px solid #3498db;
+            margin-bottom: 20px;
+            padding: 20px 25px;
+            border-radius: 8px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .topic:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+        .topic h3 {
+            color: #2980b9;
+            margin-top: 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.4em;
+        }
+        .topic h3::after {
+            content: '+';
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+        .topic.active h3::after {
+            content: '-';
+            transform: rotate(0deg);
+        }
+        .topic-content {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #bdc3c7;
+            color: #555;
+        }
+        .topic.active .topic-content {
+            display: block;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            background-color: #e8f4f8;
+            margin-bottom: 8px;
+            padding: 10px 15px;
+            border-left: 3px solid #5dade2;
+            border-radius: 4px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #777;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Machine Learning Engineering Interview Preparation</h1>
+        <p>This guide outlines the 10 most critical topics you should study to excel in a Machine Learning Engineering interview. Understanding these areas will demonstrate both your theoretical knowledge and practical implementation skills.</p>
+
+        <div class="topic">
+            <h3>1. Machine Learning Fundamentals</h3>
+            <div class="topic-content">
+                <p><strong>Importance:</strong> Forms the bedrock of all ML work, essential for understanding how models learn and make predictions across different problem types.</p>
+                <p><strong>Key Areas:</strong> Supervised, Unsupervised, and Reinforcement Learning paradigms, types of ML problems (regression, classification, clustering), bias-variance trade-off.</p>
+            </div>
+        </div>
+
+        <div class="topic">
+            <h3>2. Feature Engineering and Selection</h3>
+            <div class="topic-content">
+                <p><strong>Importance:</strong> Critical for practical ML application; well-engineered features often have a greater impact on model performance than algorithm choice alone.</p>
+                <p><strong>Key Areas:</strong> Handling missing data, encoding categorical variables, scaling features, dimensionality reduction (PCA), feature creation (polynomial, interaction features), feature selection techniques (e.g., RFE, SelectKBest).</p>
+            </div>
+        </div>
+
+        <div class="topic">
+            <h3>3. Model Evaluation, Metrics, and Hyperparameter Tuning</h3>
+            <div class="topic-content">
+                <p><strong>Importance:</strong> Essential for assessing model performance, comparing different models, and optimizing their behavior for specific business objectives.</p>
+                <p><strong>Key Areas:</strong> Classification metrics (accuracy, precision, recall, F1-score, ROC-AUC), Regression metrics (RMSE, MAE, R²), Cross-validation strategies, Grid Search, Random Search, Bayesian Optimization.</p>
+            </div>
+        </div>
+
+        <div class="topic">
+            <h3>4. ML Algorithms (Practical Application)</h3>
+            <div class="topic-content">
+                <p><strong>Importance:</strong> Engineers need to select, implement, and optimize the right algorithm for a given problem and dataset, understanding their underlying mechanics.</p>
+                <p><strong>Key Areas:</strong> Linear & Logistic Regression, Decision Trees, Random Forests, Gradient Boosting Machines (XGBoost, LightGBM), Support Vector Machines (SVMs), K-Means clustering. Focus on assumptions, strengths, and weaknesses.</p>
+            </div>
+        </div>
+
+        <div class="topic">
+            <h3>5. Deep Learning Fundamentals</h3>
+            <div class="topic-content">
+                <p><strong>Importance:</strong> Deep learning is prevalent across many AI applications; an ML Engineer should understand its basics, common architectures, and when to apply them.</p>
+                <p><strong>Key Areas:</strong> Neural network architecture (MLPs, CNNs, RNNs - basic understanding), activation functions (ReLU, Sigmoid, Tanh), loss functions, optimizers (SGD, Adam, RMSprop), backpropagation concept.</p>
+            </div>
+        </div>
+
+        <div class="topic">
+            <h3>6. MLOps (Machine Learning Operations)</h3>
+            <div class="topic-content">
+                <p><strong>Importance:</strong> Crucial for taking ML models from research/development to production, ensuring reliability, scalability, and maintainability in real-world scenarios.</p>
+                <p><strong>Key Areas:</strong> Model deployment strategies (REST APIs, batch inference), model monitoring (data drift, concept drift), experiment tracking, model versioning, CI/CD for ML pipelines, reproducibility.</p>
+            </div>
+        </div>
+
+        <div class="topic">
+            <h3>7. Scalability and Distributed ML</h3>
+            <div class="topic-content">
+                <p><strong>Importance:</strong> Real-world ML applications often involve massive datasets and require scalable solutions for both training and serving models.</p>
+                <p><strong>Key Areas:</strong> Distributed computing concepts, frameworks like Apache Spark or Dask for large-scale data processing and model training, parallelization strategies, efficient data handling for big data.</p>
+            </div>
+        </div>
+
+        <div class="topic">
+            <h3>8. Cloud ML Platforms and Services</h3>
+            <div class="topic-content">
+                <p><strong>Importance:</strong> Most modern MLOps practices leverage cloud infrastructure; practical experience with cloud-native ML services is highly valued.</p>
+                <p><strong>Key Areas:</strong> Familiarity with services from AWS (SageMaker), Google Cloud (AI Platform, Vertex AI), or Azure (Azure ML) for data storage, ML training, model deployment, and monitoring.</p>
+            </div>
+        </div>
+
+        <div class="topic">
+            <h3>9. Data Engineering for ML</h3>
+            <div class="topic-content">
+                <p><strong>Importance:</strong> ML models are only as good as the data they are trained on. Engineers often bridge the gap between raw data and usable features.</p>
+                <p><strong>Key Areas:</strong> Understanding data pipelines (ETL/ELT), data storage solutions (data lakes, data warehouses), data quality checks, data governance basics, working with various data formats (Parquet, ORC, CSV, JSON).</p>
+            </div>
+        </div>
+
+        <div class="topic">
+            <h3>10. System Design & Software Engineering Principles</h3>
+            <div class="topic-content">
+                <p><strong>Importance:</strong> ML Engineers are fundamentally engineers; strong software engineering skills are vital for building robust, maintainable, efficient, and well-tested ML products.</p>
+                <p><strong>Key Areas:</strong> Designing end-to-end ML systems, understanding microservices, API design, clean code principles, unit and integration testing, debugging, version control (Git), understanding system constraints.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2023 AI Interview Prep Assistant. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const topicHeaders = document.querySelectorAll('.topic h3');
+
+            topicHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const topic = this.closest('.topic');
+                    topic.classList.toggle('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+			background: linear-gradient(to right, purple, blue);
+		}
+		.navbar {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 1rem;
+			background: #333;
+			color: white;
+		}
+		.navbar a {
+			color: white;
+			margin: 0 1rem;
+			text-decoration: none;
+		}
+		.hero {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 80vh;
+			color: white;
+			text-align: center;
+		}
+		.features,.pricing,.footer {
+			padding: 2rem;
+			text-align: center;
+		}
+		.card {
+			background: #f0f0f0;
+			padding: 1rem;
+			margin: 1rem;
+			border-radius: 5px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+		.plan {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			margin: 1rem;
+		}
+		.plan h2 {
+			margin: 0;
+		}
+		.plan p {
+			margin: 0.5rem 0;
+		}
+		.plan button {
+			background: #333;
+			color: white;
+			padding: 0.5rem 1rem;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			margin-top: 1rem;
+		}
+	</style>
+</head>
+<body>
+	<!-- Navbar -->
+	<div class="navbar">
+		<img src="logo.png" alt="Logo" style="height: 30px;">
+		<a href="#">Home</a>
+		<a href="#">Features</a>
+		<a href="#">Pricing</a>
+	</div>
+	<!-- Hero -->
+	<div class="hero">
+		<h1>DataMind</h1>
+		<p>Your AI tool for data analysis</p>
+	</div>
+	<!-- Features -->
+	<div class="features">
+		<h2>Features</h2>
+		<div class="card">
+			<h3>Feature 1</h3>
+			<p>Description of feature 1</p>
+		</div>
+		<div class="card">
+			<h3>Feature 2</h3>
+			<p>Description of feature 2</p>
+		</div>
+		<div class="card">
+			<h3>Feature 3</h3>
+			<p>Description of feature 3</p>
+		</div>
+	</div>
+	<!-- Pricing -->
+	<div class="pricing">
+		<h2>Pricing</h2>
+		<div class="plan">
+			<h2>Free</h2>
+			<p>Description of free plan</p>
+			<button>Sign Up</button>
+		</div>
+		<div class="plan">
+			<h2>Pro</h2>
+			<p>Description of pro plan</p>
+			<button>Sign Up</button>
+		</div>
+	</div>
+	<!-- Footer -->
+	<div class="footer">
+		<p>&copy; 2023 DataMind. All rights reserved.</p>
+	</div>
+</body>
+</html>
