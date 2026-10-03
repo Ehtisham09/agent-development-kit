@@ -1,0 +1,1 @@
+This agent takes the database requirements document from the requirements writer agent and designs a comprehensive relational database schema. It creates detailed SQL statements for all tables, defines foreign key relationships, implements indexes, and produces production-ready database design documentation that can be used to implement the actual SQLite database.

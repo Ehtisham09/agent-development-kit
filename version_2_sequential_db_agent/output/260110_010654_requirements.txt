@@ -1,0 +1,485 @@
+## Hospital Management System - Relational Database Schema Design
+
+### 1. Introduction
+
+This document outlines the relational database schema design for a Hospital Management System (HMS). The design aims to provide a robust, normalized, and efficient data model to manage patient information, doctor details, appointments, medical records, admissions, prescriptions, and billing. The schema adheres to normalization principles, primarily 3NF, to minimize data redundancy and ensure data integrity.
+
+### 2. Entities and Relationships Overview
+
+The system comprises the following core entities:
+*   **Patients:** Stores demographic and contact information for all registered patients.
+*   **Doctors:** Manages details of medical professionals, including their specialization and departmental affiliations.
+*   **Departments:** Defines the various departments within the hospital.
+*   **Staff:** Records information for non-medical personnel (e.g., nurses, administrative staff).
+*   **Rooms:** Manages hospital rooms, including their type and availability.
+*   **Admissions:** Tracks patient admissions, discharge, and room assignments.
+*   **Appointments:** Schedules and manages patient-doctor consultations.
+*   **Medical Records:** Stores detailed medical history, diagnoses, and treatments for patients.
+*   **Medications:** Catalogs all available medications with stock information.
+*   **Prescriptions:** Records medication prescriptions issued by doctors.
+*   **Prescription Items:** Details the specific medications and their dosages within a prescription.
+*   **Bills:** Manages financial transactions, services rendered, and payment status.
+*   **Bill Items:** Breaks down the charges within each bill.
+
+### 3. Database Schema Details
+
+#### 3.1. Table Definitions
+
+**Table: `Patients`**
+*   **Description:** Stores personal and contact information for each patient.
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `patient_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the patient.
+    *   `first_name` (VARCHAR(100), NOT NULL): Patient's first name.
+    *   `last_name` (VARCHAR(100), NOT NULL): Patient's last name.
+    *   `date_of_birth` (DATE, NOT NULL): Patient's date of birth.
+    *   `gender` (VARCHAR(10), NOT NULL): Patient's gender (e.g., 'Male', 'Female', 'Other').
+    *   `address` (VARCHAR(255), NULLABLE): Patient's residential address.
+    *   `phone_number` (VARCHAR(20), NOT NULL, UNIQUE): Patient's primary phone number.
+    *   `email` (VARCHAR(100), UNIQUE, NULLABLE): Patient's email address.
+    *   `blood_group` (VARCHAR(5), NULLABLE): Patient's blood group (e.g., 'A+', 'O-').
+    *   `registration_date` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP): Date and time of patient registration.
+*   **Constraints:**
+    *   `PK_Patients`: Primary key on `patient_id`.
+    *   `UQ_Patients_PhoneNumber`: Unique constraint on `phone_number`.
+    *   `UQ_Patients_Email`: Unique constraint on `email`.
+
+**Table: `Departments`**
+*   **Description:** Lists the different departments within the hospital.
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `department_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the department.
+    *   `department_name` (VARCHAR(100), NOT NULL, UNIQUE): Name of the department (e.g., 'Cardiology', 'Pediatrics').
+    *   `description` (TEXT, NULLABLE): A brief description of the department.
+*   **Constraints:**
+    *   `PK_Departments`: Primary key on `department_id`.
+    *   `UQ_DepartmentName`: Unique constraint on `department_name`.
+
+**Table: `Doctors`**
+*   **Description:** Stores information about doctors and their specializations.
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `doctor_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the doctor.
+    *   `first_name` (VARCHAR(100), NOT NULL): Doctor's first name.
+    *   `last_name` (VARCHAR(100), NOT NULL): Doctor's last name.
+    *   `specialization` (VARCHAR(100), NOT NULL): Doctor's medical specialization.
+    *   `phone_number` (VARCHAR(20), UNIQUE, NULLABLE): Doctor's phone number.
+    *   `email` (VARCHAR(100), UNIQUE, NULLABLE): Doctor's email address.
+    *   `license_number` (VARCHAR(50), NOT NULL, UNIQUE): Doctor's medical license number.
+    *   `department_id` (INT, NOT NULL): Foreign key referencing `Departments.department_id`.
+*   **Constraints:**
+    *   `PK_Doctors`: Primary key on `doctor_id`.
+    *   `UQ_Doctors_PhoneNumber`: Unique constraint on `phone_number`.
+    *   `UQ_Doctors_Email`: Unique constraint on `email`.
+    *   `UQ_Doctors_LicenseNumber`: Unique constraint on `license_number`.
+    *   `FK_Doctors_Department`: Foreign key from `department_id` to `Departments.department_id`.
+
+**Table: `Staff`**
+*   **Description:** Stores information about non-medical hospital staff (e.g., nurses, administrative staff).
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `staff_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the staff member.
+    *   `first_name` (VARCHAR(100), NOT NULL): Staff member's first name.
+    *   `last_name` (VARCHAR(100), NOT NULL): Staff member's last name.
+    *   `role` (VARCHAR(100), NOT NULL): Role of the staff member (e.g., 'Nurse', 'Receptionist', 'Administrator').
+    *   `phone_number` (VARCHAR(20), UNIQUE, NULLABLE): Staff member's phone number.
+    *   `email` (VARCHAR(100), UNIQUE, NULLABLE): Staff member's email address.
+    *   `department_id` (INT, NULLABLE): Foreign key referencing `Departments.department_id`.
+*   **Constraints:**
+    *   `PK_Staff`: Primary key on `staff_id`.
+    *   `UQ_Staff_PhoneNumber`: Unique constraint on `phone_number`.
+    *   `UQ_Staff_Email`: Unique constraint on `email`.
+    *   `FK_Staff_Department`: Foreign key from `department_id` to `Departments.department_id`.
+
+**Table: `Rooms`**
+*   **Description:** Manages details of hospital rooms, including their type and current availability.
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `room_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the room.
+    *   `room_number` (VARCHAR(10), NOT NULL, UNIQUE): Unique identifier for the room (e.g., '101', 'ICU-A').
+    *   `room_type` (VARCHAR(50), NOT NULL): Type of room (e.g., 'General Ward', 'Private Room', 'ICU').
+    *   `capacity` (INT, NOT NULL, DEFAULT 1): Maximum patient capacity of the room.
+    *   `current_occupancy` (INT, NOT NULL, DEFAULT 0): Current number of patients in the room.
+    *   `is_available` (BOOLEAN, NOT NULL, DEFAULT TRUE): Indicates if the room is currently available.
+*   **Constraints:**
+    *   `PK_Rooms`: Primary key on `room_id`.
+    *   `UQ_RoomNumber`: Unique constraint on `room_number`.
+    *   `CK_RoomCapacity`: Check constraint ensuring `current_occupancy` <= `capacity`.
+
+**Table: `Admissions`**
+*   **Description:** Records patient admissions and discharge information.
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `admission_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the admission record.
+    *   `patient_id` (INT, NOT NULL): Foreign key referencing `Patients.patient_id`.
+    *   `admission_date` (DATETIME, NOT NULL): Date and time of admission.
+    *   `discharge_date` (DATETIME, NULLABLE): Date and time of discharge (NULL if patient is still admitted).
+    *   `room_id` (INT, NULLABLE): Foreign key referencing `Rooms.room_id` (NULL if room not yet assigned or patient discharged).
+    *   `admitting_doctor_id` (INT, NOT NULL): Foreign key referencing `Doctors.doctor_id`.
+    *   `initial_diagnosis` (TEXT, NULLABLE): Diagnosis at the time of admission.
+*   **Constraints:**
+    *   `PK_Admissions`: Primary key on `admission_id`.
+    *   `FK_Admissions_Patient`: Foreign key from `patient_id` to `Patients.patient_id`.
+    *   `FK_Admissions_Room`: Foreign key from `room_id` to `Rooms.room_id`.
+    *   `FK_Admissions_AdmittingDoctor`: Foreign key from `admitting_doctor_id` to `Doctors.doctor_id`.
+    *   `CK_DischargeDate`: Check constraint ensuring `discharge_date` is NULL or after `admission_date`.
+
+**Table: `Appointments`**
+*   **Description:** Manages scheduled appointments between patients and doctors.
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `appointment_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the appointment.
+    *   `patient_id` (INT, NOT NULL): Foreign key referencing `Patients.patient_id`.
+    *   `doctor_id` (INT, NOT NULL): Foreign key referencing `Doctors.doctor_id`.
+    *   `appointment_date_time` (DATETIME, NOT NULL): Scheduled date and time of the appointment.
+    *   `status` (VARCHAR(50), NOT NULL, DEFAULT 'Scheduled'): Current status of the appointment (e.g., 'Scheduled', 'Completed', 'Cancelled', 'No-Show').
+    *   `reason_for_visit` (TEXT, NULLABLE): Patient's reason for the appointment.
+*   **Constraints:**
+    *   `PK_Appointments`: Primary key on `appointment_id`.
+    *   `FK_Appointments_Patient`: Foreign key from `patient_id` to `Patients.patient_id`.
+    *   `FK_Appointments_Doctor`: Foreign key from `doctor_id` to `Doctors.doctor_id`.
+    *   `UQ_AppointmentDateTime_Doctor`: Unique constraint on `(appointment_date_time, doctor_id)` to prevent double booking for a doctor.
+
+**Table: `Medical_Records`**
+*   **Description:** Stores detailed medical history, diagnoses, treatments, and notes for patients.
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `record_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the medical record.
+    *   `patient_id` (INT, NOT NULL): Foreign key referencing `Patients.patient_id`.
+    *   `doctor_id` (INT, NOT NULL): Foreign key referencing `Doctors.doctor_id`.
+    *   `record_date_time` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP): Date and time the record was created/updated.
+    *   `admission_id` (INT, NULLABLE): Foreign key referencing `Admissions.admission_id` (if record is part of an admission).
+    *   `diagnosis` (TEXT, NOT NULL): Medical diagnosis.
+    *   `treatment` (TEXT, NULLABLE): Details of the treatment plan.
+    *   `notes` (TEXT, NULLABLE): Additional medical notes or observations.
+*   **Constraints:**
+    *   `PK_MedicalRecords`: Primary key on `record_id`.
+    *   `FK_MedicalRecords_Patient`: Foreign key from `patient_id` to `Patients.patient_id`.
+    *   `FK_MedicalRecords_Doctor`: Foreign key from `doctor_id` to `Doctors.doctor_id`.
+    *   `FK_MedicalRecords_Admission`: Foreign key from `admission_id` to `Admissions.admission_id`.
+
+**Table: `Medications`**
+*   **Description:** Catalogs all available medications in the hospital pharmacy.
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `medication_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the medication.
+    *   `medication_name` (VARCHAR(255), NOT NULL, UNIQUE): Brand or generic name of the medication.
+    *   `generic_name` (VARCHAR(255), NULLABLE): Generic name of the medication.
+    *   `description` (TEXT, NULLABLE): Description of the medication, including strength and form.
+    *   `stock_quantity` (INT, NOT NULL, DEFAULT 0): Current quantity in stock.
+    *   `unit_price` (DECIMAL(10, 2), NOT NULL, DEFAULT 0.00): Price per unit of the medication.
+*   **Constraints:**
+    *   `PK_Medications`: Primary key on `medication_id`.
+    *   `UQ_MedicationName`: Unique constraint on `medication_name`.
+    *   `CK_StockQuantity`: Check constraint ensuring `stock_quantity` >= 0.
+    *   `CK_UnitPrice`: Check constraint ensuring `unit_price` >= 0.00.
+
+**Table: `Prescriptions`**
+*   **Description:** Records prescriptions issued to patients by doctors.
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `prescription_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the prescription.
+    *   `patient_id` (INT, NOT NULL): Foreign key referencing `Patients.patient_id`.
+    *   `doctor_id` (INT, NOT NULL): Foreign key referencing `Doctors.doctor_id`.
+    *   `prescription_date` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP): Date and time the prescription was issued.
+    *   `notes` (TEXT, NULLABLE): General notes for the prescription.
+*   **Constraints:**
+    *   `PK_Prescriptions`: Primary key on `prescription_id`.
+    *   `FK_Prescriptions_Patient`: Foreign key from `patient_id` to `Patients.patient_id`.
+    *   `FK_Prescriptions_Doctor`: Foreign key from `doctor_id` to `Doctors.doctor_id`.
+
+**Table: `Prescription_Items`**
+*   **Description:** Details the individual medications, dosages, and frequencies within a prescription. This is a junction table for a many-to-many relationship between Prescriptions and Medications.
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `prescription_item_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for each item in a prescription.
+    *   `prescription_id` (INT, NOT NULL): Foreign key referencing `Prescriptions.prescription_id`.
+    *   `medication_id` (INT, NOT NULL): Foreign key referencing `Medications.medication_id`.
+    *   `dosage` (VARCHAR(100), NOT NULL): Dosage instructions (e.g., '10mg', '2 tablets').
+    *   `frequency` (VARCHAR(100), NOT NULL): How often the medication should be taken (e.g., 'Twice daily', 'Every 4 hours').
+    *   `duration` (VARCHAR(100), NULLABLE): Duration of medication (e.g., '7 days', 'Until finished').
+    *   `quantity_prescribed` (INT, NOT NULL): Total quantity of medication prescribed.
+*   **Constraints:**
+    *   `PK_PrescriptionItems`: Primary key on `prescription_item_id`.
+    *   `FK_PrescriptionItems_Prescription`: Foreign key from `prescription_id` to `Prescriptions.prescription_id`.
+    *   `FK_PrescriptionItems_Medication`: Foreign key from `medication_id` to `Medications.medication_id`.
+    *   `UQ_PrescriptionItem`: Unique constraint on `(prescription_id, medication_id)` to prevent duplicate medication entries in a single prescription.
+    *   `CK_QuantityPrescribed`: Check constraint ensuring `quantity_prescribed` > 0.
+
+**Table: `Bills`**
+*   **Description:** Manages financial bills generated for patients, services, and payments.
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `bill_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the bill.
+    *   `patient_id` (INT, NOT NULL): Foreign key referencing `Patients.patient_id`.
+    *   `admission_id` (INT, NULLABLE): Foreign key referencing `Admissions.admission_id` (if bill is related to an admission).
+    *   `bill_date` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP): Date and time the bill was generated.
+    *   `total_amount` (DECIMAL(10, 2), NOT NULL, DEFAULT 0.00): Total amount of the bill.
+    *   `amount_paid` (DECIMAL(10, 2), NOT NULL, DEFAULT 0.00): Amount paid by the patient.
+    *   `due_date` (DATE, NULLABLE): Due date for payment.
+    *   `payment_status` (VARCHAR(50), NOT NULL, DEFAULT 'Pending'): Current payment status (e.g., 'Pending', 'Paid', 'Partially Paid', 'Overdue').
+*   **Constraints:**
+    *   `PK_Bills`: Primary key on `bill_id`.
+    *   `FK_Bills_Patient`: Foreign key from `patient_id` to `Patients.patient_id`.
+    *   `FK_Bills_Admission`: Foreign key from `admission_id` to `Admissions.admission_id`.
+    *   `CK_TotalAmount`: Check constraint ensuring `total_amount` >= 0.00.
+    *   `CK_AmountPaid`: Check constraint ensuring `amount_paid` >= 0.00 AND `amount_paid` <= `total_amount`.
+
+**Table: `Bill_Items`**
+*   **Description:** Details the individual charges/services within a bill.
+*   **Normalization:** 3NF
+*   **Columns:**
+    *   `bill_item_id` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for each item on a bill.
+    *   `bill_id` (INT, NOT NULL): Foreign key referencing `Bills.bill_id`.
+    *   `service_description` (VARCHAR(255), NOT NULL): Description of the service or item (e.g., 'Consultation Fee', 'Room Charges (2 days)', 'Medication: Paracetamol').
+    *   `quantity` (INT, NOT NULL, DEFAULT 1): Quantity of the service/item.
+    *   `unit_price` (DECIMAL(10, 2), NOT NULL, DEFAULT 0.00): Price per unit of the service/item.
+    *   `item_amount` (DECIMAL(10, 2), NOT NULL): Calculated amount for the item (`quantity` * `unit_price`).
+*   **Constraints:**
+    *   `PK_BillItems`: Primary key on `bill_item_id`.
+    *   `FK_BillItems_Bill`: Foreign key from `bill_id` to `Bills.bill_id`.
+    *   `CK_BillItemQuantity`: Check constraint ensuring `quantity` > 0.
+    *   `CK_BillItemUnitPrice`: Check constraint ensuring `unit_price` >= 0.00.
+    *   `CK_BillItemAmount`: Check constraint ensuring `item_amount` = `quantity` * `unit_price`.
+
+#### 3.2. Relationship Documentation
+
+*   **`Patients` (One-to-Many) `Appointments`**: A patient can have multiple appointments, but each appointment belongs to one patient.
+*   **`Patients` (One-to-Many) `Admissions`**: A patient can have multiple admissions, but each admission belongs to one patient.
+*   **`Patients` (One-to-Many) `Medical_Records`**: A patient can have multiple medical records, but each record belongs to one patient.
+*   **`Patients` (One-to-Many) `Prescriptions`**: A patient can receive multiple prescriptions, but each prescription is for one patient.
+*   **`Patients` (One-to-Many) `Bills`**: A patient can have multiple bills, but each bill is for one patient.
+
+*   **`Doctors` (One-to-Many) `Appointments`**: A doctor can have multiple appointments, but each appointment is with one doctor.
+*   **`Doctors` (One-to-Many) `Admissions`**: A doctor can admit multiple patients, but each admission is overseen by one admitting doctor.
+*   **`Doctors` (One-to-Many) `Medical_Records`**: A doctor can create multiple medical records, but each record is associated with one doctor.
+*   **`Doctors` (One-to-Many) `Prescriptions`**: A doctor can issue multiple prescriptions, but each prescription is issued by one doctor.
+
+*   **`Departments` (One-to-Many) `Doctors`**: A department can have multiple doctors, but each doctor belongs to one department.
+*   **`Departments` (One-to-Many) `Staff`**: A department can have multiple staff members, but each staff member belongs to one department.
+
+*   **`Rooms` (One-to-Many) `Admissions`**: A room can host multiple admissions over time, but each admission is assigned to one room at a time.
+
+*   **`Admissions` (One-to-Many) `Medical_Records`**: An admission can have multiple associated medical records, but each record relating to an admission belongs to one admission.
+*   **`Admissions` (One-to-Many) `Bills`**: An admission can generate multiple bills, but each bill related to an admission belongs to one admission.
+
+*   **`Prescriptions` (Many-to-Many) `Medications`**: A prescription can include multiple medications, and a medication can be part of many prescriptions. This is resolved by the `Prescription_Items` junction table.
+    *   `Prescriptions` (One-to-Many) `Prescription_Items`
+    *   `Medications` (One-to-Many) `Prescription_Items`
+
+*   **`Bills` (One-to-Many) `Bill_Items`**: A bill can have multiple bill items, but each bill item belongs to one bill.
+
+#### 3.3. Normalization Level
+
+The database schema is designed to achieve **Third Normal Form (3NF)**.
+*   **1NF (First Normal Form):** All tables have a primary key, and all attributes are atomic (single-valued). There are no repeating groups.
+*   **2NF (Second Normal Form):** All non-key attributes are fully functionally dependent on the primary key. This is ensured by the composite keys and foreign keys.
+*   **3NF (Third Normal Form):** All non-key attributes are non-transitively dependent on the primary key. This means there are no transitive dependencies, where a non-key attribute depends on another non-key attribute. For example, `department_name` is stored only in the `Departments` table, and `Doctors` references it via `department_id`, avoiding redundancy.
+
+### 4. Indexes and Performance Considerations
+
+Indexes will be crucial for query performance, especially on frequently accessed columns and foreign keys.
+*   **Primary Keys:** Automatically indexed by the database system.
+*   **Foreign Keys:** Should generally be indexed to speed up join operations.
+*   **Unique Constraints:** Automatically indexed.
+*   **Frequently Queried Columns:** Columns used in `WHERE` clauses, `ORDER BY`, or `GROUP BY` should be considered for indexing.
+
+**Recommended Indexes:**
+*   `Patients`: Index on `(first_name, last_name)`, `phone_number`, `email`.
+*   `Doctors`: Index on `(first_name, last_name)`, `specialization`, `department_id`, `license_number`.
+*   `Appointments`: Index on `(patient_id, doctor_id, appointment_date_time)`, `doctor_id`, `patient_id`.
+*   `Admissions`: Index on `(patient_id, admission_date)`, `room_id`, `admitting_doctor_id`.
+*   `Medical_Records`: Index on `(patient_id, record_date_time)`, `doctor_id`, `admission_id`.
+*   `Medications`: Index on `medication_name`.
+*   `Prescriptions`: Index on `patient_id`, `doctor_id`, `prescription_date`.
+*   `Prescription_Items`: Index on `prescription_id`, `medication_id`.
+*   `Bills`: Index on `patient_id`, `bill_date`, `payment_status`.
+*   `Bill_Items`: Index on `bill_id`.
+
+### 5. Data Integrity Constraints and Business Rules
+
+*   **Referential Integrity:** Enforced by foreign key constraints, ensuring that relationships between tables are maintained (e.g., a patient cannot be admitted if they don't exist in the `Patients` table).
+*   **Entity Integrity:** Enforced by primary key constraints, ensuring each record in a table is uniquely identified.
+*   **Domain Integrity:** Enforced by data types, `NOT NULL` constraints, `UNIQUE` constraints, and `CHECK` constraints.
+    *   `stock_quantity` in `Medications` must be non-negative.
+    *   `unit_price` in `Medications` and `Bill_Items` must be non-negative.
+    *   `current_occupancy` in `Rooms` cannot exceed `capacity`.
+    *   `discharge_date` in `Admissions` must be `NULL` or after `admission_date`.
+    *   `amount_paid` in `Bills` cannot exceed `total_amount`.
+*   **Business Rules:**
+    *   A doctor cannot have two appointments scheduled at the exact same date and time (`UQ_AppointmentDateTime_Doctor`).
+    *   A patient cannot be admitted with a `discharge_date` earlier than their `admission_date`.
+    *   Medication stock must be updated upon dispensing (application-level logic, but `stock_quantity` constraint helps).
+    *   `item_amount` in `Bill_Items` should always reflect `quantity * unit_price`.
+
+### 6. SQL CREATE TABLE Statements (Example for MySQL/PostgreSQL syntax)
+
+```sql
+-- Table: Patients
+CREATE TABLE Patients (
+    patient_id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    date_of_birth DATE NOT NULL,
+    gender VARCHAR(10) NOT NULL,
+    address VARCHAR(255),
+    phone_number VARCHAR(20) NOT NULL UNIQUE,
+    email VARCHAR(100) UNIQUE,
+    blood_group VARCHAR(5),
+    registration_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: Departments
+CREATE TABLE Departments (
+    department_id INT AUTO_INCREMENT PRIMARY KEY,
+    department_name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT
+);
+
+-- Table: Doctors
+CREATE TABLE Doctors (
+    doctor_id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    specialization VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(20) UNIQUE,
+    email VARCHAR(100) UNIQUE,
+    license_number VARCHAR(50) NOT NULL UNIQUE,
+    department_id INT NOT NULL,
+    FOREIGN KEY (department_id) REFERENCES Departments(department_id)
+);
+
+-- Table: Staff
+CREATE TABLE Staff (
+    staff_id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    role VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(20) UNIQUE,
+    email VARCHAR(100) UNIQUE,
+    department_id INT,
+    FOREIGN KEY (department_id) REFERENCES Departments(department_id)
+);
+
+-- Table: Rooms
+CREATE TABLE Rooms (
+    room_id INT AUTO_INCREMENT PRIMARY KEY,
+    room_number VARCHAR(10) NOT NULL UNIQUE,
+    room_type VARCHAR(50) NOT NULL,
+    capacity INT NOT NULL DEFAULT 1,
+    current_occupancy INT NOT NULL DEFAULT 0,
+    is_available BOOLEAN NOT NULL DEFAULT TRUE,
+    CHECK (current_occupancy >= 0 AND current_occupancy <= capacity)
+);
+
+-- Table: Admissions
+CREATE TABLE Admissions (
+    admission_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    admission_date DATETIME NOT NULL,
+    discharge_date DATETIME,
+    room_id INT,
+    admitting_doctor_id INT NOT NULL,
+    initial_diagnosis TEXT,
+    FOREIGN KEY (patient_id) REFERENCES Patients(patient_id),
+    FOREIGN KEY (room_id) REFERENCES Rooms(room_id),
+    FOREIGN KEY (admitting_doctor_id) REFERENCES Doctors(doctor_id),
+    CHECK (discharge_date IS NULL OR discharge_date >= admission_date)
+);
+
+-- Table: Appointments
+CREATE TABLE Appointments (
+    appointment_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    appointment_date_time DATETIME NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'Scheduled',
+    reason_for_visit TEXT,
+    FOREIGN KEY (patient_id) REFERENCES Patients(patient_id),
+    FOREIGN KEY (doctor_id) REFERENCES Doctors(doctor_id),
+    UNIQUE (doctor_id, appointment_date_time) -- Prevent double booking for a doctor
+);
+
+-- Table: Medical_Records
+CREATE TABLE Medical_Records (
+    record_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    record_date_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    admission_id INT,
+    diagnosis TEXT NOT NULL,
+    treatment TEXT,
+    notes TEXT,
+    FOREIGN KEY (patient_id) REFERENCES Patients(patient_id),
+    FOREIGN KEY (doctor_id) REFERENCES Doctors(doctor_id),
+    FOREIGN KEY (admission_id) REFERENCES Admissions(admission_id)
+);
+
+-- Table: Medications
+CREATE TABLE Medications (
+    medication_id INT AUTO_INCREMENT PRIMARY KEY,
+    medication_name VARCHAR(255) NOT NULL UNIQUE,
+    generic_name VARCHAR(255),
+    description TEXT,
+    stock_quantity INT NOT NULL DEFAULT 0,
+    unit_price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    CHECK (stock_quantity >= 0),
+    CHECK (unit_price >= 0.00)
+);
+
+-- Table: Prescriptions
+CREATE TABLE Prescriptions (
+    prescription_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    prescription_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    notes TEXT,
+    FOREIGN KEY (patient_id) REFERENCES Patients(patient_id),
+    FOREIGN KEY (doctor_id) REFERENCES Doctors(doctor_id)
+);
+
+-- Table: Prescription_Items
+CREATE TABLE Prescription_Items (
+    prescription_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    prescription_id INT NOT NULL,
+    medication_id INT NOT NULL,
+    dosage VARCHAR(100) NOT NULL,
+    frequency VARCHAR(100) NOT NULL,
+    duration VARCHAR(100),
+    quantity_prescribed INT NOT NULL,
+    FOREIGN KEY (prescription_id) REFERENCES Prescriptions(prescription_id),
+    FOREIGN KEY (medication_id) REFERENCES Medications(medication_id),
+    UNIQUE (prescription_id, medication_id), -- A medication can only be listed once per prescription
+    CHECK (quantity_prescribed > 0)
+);
+
+-- Table: Bills
+CREATE TABLE Bills (
+    bill_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    admission_id INT,
+    bill_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    total_amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    amount_paid DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    due_date DATE,
+    payment_status VARCHAR(50) NOT NULL DEFAULT 'Pending',
+    FOREIGN KEY (patient_id) REFERENCES Patients(patient_id),
+    FOREIGN KEY (admission_id) REFERENCES Admissions(admission_id),
+    CHECK (total_amount >= 0.00),
+    CHECK (amount_paid >= 0.00 AND amount_paid <= total_amount)
+);
+
+-- Table: Bill_Items
+CREATE TABLE Bill_Items (
+    bill_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    bill_id INT NOT NULL,
+    service_description VARCHAR(255) NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    item_amount DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (bill_id) REFERENCES Bills(bill_id),
+    CHECK (quantity > 0),
+    CHECK (unit_price >= 0.00),
+    CHECK (item_amount = quantity * unit_price)
+);
+```

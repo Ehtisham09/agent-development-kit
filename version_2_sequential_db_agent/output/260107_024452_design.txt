@@ -1,0 +1,512 @@
+School Management System Database Design Specification
+
+Application Type: School Management System
+Data Domain: Education
+
+## Global Database Design System
+
+### Data Type Standards:
+*   **Identifiers**: INTEGER PRIMARY KEY AUTOINCREMENT (SQLite)
+*   **Text Fields (Short)**: VARCHAR(255)
+*   **Text Fields (Long)**: TEXT
+*   **Dates**: TEXT (YYYY-MM-DD format for SQLite)
+*   **Times**: TEXT (HH:MM:SS format for SQLite)
+*   **Timestamps**: TEXT (YYYY-MM-DD HH:MM:SS format for SQLite)
+*   **Booleans**: INTEGER (0 for false, 1 for true)
+*   **Decimal Numbers**: DECIMAL(10,2) or REAL (SQLite's preference for floating point numbers)
+*   **Enumerations (ENUM)**: TEXT or VARCHAR(X) with an explicit CHECK constraint listing allowed values.
+
+### Naming Conventions:
+*   **Table Names**: Singular, PascalCase (e.g., User, Product, Order)
+*   **Column Names**: snake_case (e.g., user_id, created_at, email_address)
+*   **Primary Keys**: id (table-agnostic) or [table_name]_id (e.g., user_id, student_id)
+*   **Foreign Keys**: [referenced_table]_id (e.g., user_id, department_id)
+
+### Constraint Standards:
+*   All tables must have a primary key.
+*   Foreign keys must include ON DELETE and ON UPDATE rules (CASCADE, SET NULL, RESTRICT).
+*   Important fields should have NOT NULL constraints.
+*   Email, username fields should have UNIQUE constraints where applicable.
+*   CHECK constraints should be used for value validation (e.g., positive numbers, valid ranges).
+
+### Indexing Strategy:
+*   Create indexes on:
+    *   All foreign key columns
+    *   Frequently searched columns (e.g., last_name)
+    *   Columns used in JOIN operations
+    *   Unique identifiers (automatically indexed by UNIQUE constraint)
+
+## Core Table Standards
+
+### Standard Timestamp Columns:
+Every table should include:
+*   `created_at`: TEXT DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TEXT DEFAULT CURRENT_TIMESTAMP
+
+### Standard ID Columns:
+Every table must have a primary key:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+
+## Table Design Details
+
+### User:
+Purpose: Stores user authentication and authorization information for access to the system.
+Fields:
+*   id: INTEGER PRIMARY KEY AUTOINCREMENT
+*   username: VARCHAR(50) NOT NULL UNIQUE
+*   password_hash: VARCHAR(255) NOT NULL
+*   email: VARCHAR(100) UNIQUE
+*   user_type: VARCHAR(10) NOT NULL CHECK (user_type IN ('Student', 'Teacher', 'Admin'))
+*   created_at: TEXT DEFAULT CURRENT_TIMESTAMP
+*   updated_at: TEXT DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One User has One Student (foreign key: student.user_id)
+*   One User has One Teacher (foreign key: teacher.user_id)
+Indexes:
+*   CREATE UNIQUE INDEX idx_user_username ON User(username)
+*   CREATE UNIQUE INDEX idx_user_email ON User(email)
+
+### Department:
+Purpose: Stores information about academic departments.
+Fields:
+*   id: INTEGER PRIMARY KEY AUTOINCREMENT
+*   department_name: VARCHAR(100) NOT NULL UNIQUE
+*   head_of_department_id: INTEGER NULL
+*   description: TEXT
+*   created_at: TEXT DEFAULT CURRENT_TIMESTAMP
+*   updated_at: TEXT DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Department has Many Teachers (foreign key: teacher.department_id)
+*   One Department has Many Subjects (foreign key: subject.department_id)
+*   One Department is headed by One Teacher (foreign key: department.head_of_department_id references teacher.id)
+Indexes:
+*   CREATE UNIQUE INDEX idx_department_name ON Department(department_name)
+*   CREATE INDEX idx_department_head_of_department_id ON Department(head_of_department_id)
+
+### Teacher:
+Purpose: Stores personal and employment details of teachers.
+Fields:
+*   id: INTEGER PRIMARY KEY AUTOINCREMENT
+*   user_id: INTEGER NOT NULL UNIQUE
+*   first_name: VARCHAR(50) NOT NULL
+*   last_name: VARCHAR(50) NOT NULL
+*   date_of_birth: TEXT
+*   gender: VARCHAR(10) CHECK (gender IN ('Male', 'Female', 'Other'))
+*   address: VARCHAR(255)
+*   phone_number: VARCHAR(20)
+*   email: VARCHAR(100) UNIQUE
+*   hire_date: TEXT NOT NULL
+*   department_id: INTEGER NULL
+*   salary: DECIMAL(10, 2)
+*   created_at: TEXT DEFAULT CURRENT_TIMESTAMP
+*   updated_at: TEXT DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Teacher belongs to One Department (foreign key: teacher.department_id)
+*   One Teacher has One User account (foreign key: teacher.user_id)
+*   One Teacher teaches Many Classes (foreign key: class.teacher_id)
+Indexes:
+*   CREATE UNIQUE INDEX idx_teacher_user_id ON Teacher(user_id)
+*   CREATE UNIQUE INDEX idx_teacher_email ON Teacher(email)
+*   CREATE INDEX idx_teacher_department_id ON Teacher(department_id)
+*   CREATE INDEX idx_teacher_last_name ON Teacher(last_name)
+
+### Student:
+Purpose: Stores personal and academic details of students.
+Fields:
+*   id: INTEGER PRIMARY KEY AUTOINCREMENT
+*   user_id: INTEGER NOT NULL UNIQUE
+*   first_name: VARCHAR(50) NOT NULL
+*   last_name: VARCHAR(50) NOT NULL
+*   date_of_birth: TEXT
+*   gender: VARCHAR(10) CHECK (gender IN ('Male', 'Female', 'Other'))
+*   address: VARCHAR(255)
+*   phone_number: VARCHAR(20)
+*   email: VARCHAR(100) UNIQUE
+*   enrollment_date: TEXT NOT NULL
+*   grade_level: INTEGER
+*   guardian_name: VARCHAR(100)
+*   guardian_phone: VARCHAR(20)
+*   created_at: TEXT DEFAULT CURRENT_TIMESTAMP
+*   updated_at: TEXT DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Student has One User account (foreign key: student.user_id)
+*   One Student has Many Enrollments (foreign key: enrollment.student_id)
+*   One Student has Many Grades (foreign key: grade.student_id)
+Indexes:
+*   CREATE UNIQUE INDEX idx_student_user_id ON Student(user_id)
+*   CREATE UNIQUE INDEX idx_student_email ON Student(email)
+*   CREATE INDEX idx_student_last_name ON Student(last_name)
+
+### Subject:
+Purpose: Defines academic subjects offered (e.g., Mathematics, History, Physics).
+Fields:
+*   id: INTEGER PRIMARY KEY AUTOINCREMENT
+*   subject_name: VARCHAR(100) NOT NULL UNIQUE
+*   description: TEXT
+*   department_id: INTEGER NULL
+*   created_at: TEXT DEFAULT CURRENT_TIMESTAMP
+*   updated_at: TEXT DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Subject belongs to One Department (foreign key: subject.department_id)
+*   One Subject has Many Courses (foreign key: course.subject_id)
+Indexes:
+*   CREATE UNIQUE INDEX idx_subject_subject_name ON Subject(subject_name)
+*   CREATE INDEX idx_subject_department_id ON Subject(department_id)
+
+### Course:
+Purpose: Defines specific courses (e.g., "Algebra I", "World History II") within subjects.
+Fields:
+*   id: INTEGER PRIMARY KEY AUTOINCREMENT
+*   course_code: VARCHAR(20) NOT NULL UNIQUE
+*   course_name: VARCHAR(100) NOT NULL
+*   subject_id: INTEGER NOT NULL
+*   credits: INTEGER NOT NULL CHECK (credits > 0)
+*   description: TEXT
+*   max_students: INTEGER CHECK (max_students > 0)
+*   created_at: TEXT DEFAULT CURRENT_TIMESTAMP
+*   updated_at: TEXT DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Course belongs to One Subject (foreign key: course.subject_id)
+*   One Course has Many Classes (foreign key: class.course_id)
+Indexes:
+*   CREATE UNIQUE INDEX idx_course_course_code ON Course(course_code)
+*   CREATE INDEX idx_course_subject_id ON Course(subject_id)
+
+### Room:
+Purpose: Stores information about physical school rooms.
+Fields:
+*   id: INTEGER PRIMARY KEY AUTOINCREMENT
+*   room_number: VARCHAR(10) NOT NULL UNIQUE
+*   capacity: INTEGER NOT NULL CHECK (capacity > 0)
+*   type: VARCHAR(50)
+*   created_at: TEXT DEFAULT CURRENT_TIMESTAMP
+*   updated_at: TEXT DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Room hosts Many Classes (foreign key: class.room_id)
+Indexes:
+*   CREATE UNIQUE INDEX idx_room_room_number ON Room(room_number)
+
+### Class:
+Purpose: Represents specific offerings (sections) of a course with assigned teacher, room, and schedule.
+Fields:
+*   id: INTEGER PRIMARY KEY AUTOINCREMENT
+*   course_id: INTEGER NOT NULL
+*   teacher_id: INTEGER NOT NULL
+*   room_id: INTEGER NOT NULL
+*   semester: VARCHAR(20) NOT NULL
+*   academic_year: INTEGER NOT NULL
+*   start_time: TEXT NOT NULL
+*   end_time: TEXT NOT NULL
+*   days_of_week: VARCHAR(15) NOT NULL
+*   max_capacity: INTEGER
+*   created_at: TEXT DEFAULT CURRENT_TIMESTAMP
+*   updated_at: TEXT DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Class is an instance of One Course (foreign key: class.course_id)
+*   One Class is taught by One Teacher (foreign key: class.teacher_id)
+*   One Class is held in One Room (foreign key: class.room_id)
+*   One Class has Many Enrollments (foreign key: enrollment.class_id)
+*   One Class has Many Assignments (foreign key: assignment.class_id)
+Indexes:
+*   CREATE INDEX idx_class_course_id ON Class(course_id)
+*   CREATE INDEX idx_class_teacher_id ON Class(teacher_id)
+*   CREATE INDEX idx_class_room_id ON Class(room_id)
+*   CREATE INDEX idx_class_semester_academic_year ON Class(semester, academic_year)
+*   CREATE UNIQUE INDEX uq_class_room_schedule ON Class(room_id, semester, academic_year, start_time, end_time, days_of_week)
+*   CREATE UNIQUE INDEX uq_class_teacher_schedule ON Class(teacher_id, semester, academic_year, start_time, end_time, days_of_week)
+
+### Enrollment:
+Purpose: Records which student is enrolled in which class. Resolves the many-to-many relationship between Students and Classes.
+Fields:
+*   id: INTEGER PRIMARY KEY AUTOINCREMENT
+*   student_id: INTEGER NOT NULL
+*   class_id: INTEGER NOT NULL
+*   enrollment_date: TEXT DEFAULT CURRENT_TIMESTAMP
+*   grade: VARCHAR(5)
+*   status: VARCHAR(10) NOT NULL DEFAULT 'Enrolled' CHECK (status IN ('Enrolled', 'Withdrawn', 'Completed'))
+*   created_at: TEXT DEFAULT CURRENT_TIMESTAMP
+*   updated_at: TEXT DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Enrollment belongs to One Student (foreign key: enrollment.student_id)
+*   One Enrollment belongs to One Class (foreign key: enrollment.class_id)
+Indexes:
+*   CREATE INDEX idx_enrollment_student_id ON Enrollment(student_id)
+*   CREATE INDEX idx_enrollment_class_id ON Enrollment(class_id)
+*   CREATE UNIQUE INDEX uq_student_class ON Enrollment(student_id, class_id)
+
+### Assignment:
+Purpose: Defines assignments given for a specific class.
+Fields:
+*   id: INTEGER PRIMARY KEY AUTOINCREMENT
+*   class_id: INTEGER NOT NULL
+*   assignment_name: VARCHAR(100) NOT NULL
+*   description: TEXT
+*   due_date: TEXT NOT NULL
+*   max_score: DECIMAL(5, 2) NOT NULL CHECK (max_score > 0)
+*   weight: DECIMAL(5, 2) NOT NULL CHECK (weight >= 0 AND weight <= 100)
+*   created_at: TEXT DEFAULT CURRENT_TIMESTAMP
+*   updated_at: TEXT DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Assignment belongs to One Class (foreign key: assignment.class_id)
+*   One Assignment has Many Grades (foreign key: grade.assignment_id)
+Indexes:
+*   CREATE INDEX idx_assignment_class_id ON Assignment(class_id)
+
+### Grade:
+Purpose: Records individual student scores for specific assignments. Resolves the many-to-many relationship between Students and Assignments.
+Fields:
+*   id: INTEGER PRIMARY KEY AUTOINCREMENT
+*   assignment_id: INTEGER NOT NULL
+*   student_id: INTEGER NOT NULL
+*   score: DECIMAL(5, 2) NOT NULL CHECK (score >= 0)
+*   submission_date: TEXT
+*   feedback: TEXT
+*   created_at: TEXT DEFAULT CURRENT_TIMESTAMP
+*   updated_at: TEXT DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Grade belongs to One Assignment (foreign key: grade.assignment_id)
+*   One Grade belongs to One Student (foreign key: grade.student_id)
+Indexes:
+*   CREATE INDEX idx_grade_assignment_id ON Grade(assignment_id)
+*   CREATE INDEX idx_grade_student_id ON Grade(student_id)
+*   CREATE UNIQUE INDEX uq_assignment_student_grade ON Grade(assignment_id, student_id)
+
+## Relationships and Constraints
+
+### One-to-One Relationships:
+*   **User and Student**: Each `User.id` can be associated with at most one `Student.user_id`.
+    *   Technical Specification: Implemented by having `user_id` as a `UNIQUE FOREIGN KEY` in the `Student` table, referencing `User.id`. `ON DELETE CASCADE ON UPDATE CASCADE`.
+*   **User and Teacher**: Each `User.id` can be associated with at most one `Teacher.user_id`.
+    *   Technical Specification: Implemented by having `user_id` as a `UNIQUE FOREIGN KEY` in the `Teacher` table, referencing `User.id`. `ON DELETE CASCADE ON UPDATE CASCADE`.
+
+### One-to-Many Relationships:
+*   **Department to Teacher**: One Department has Many Teachers.
+    *   Technical Specification: `Teacher.department_id` references `Department.id`. `ON DELETE SET NULL ON UPDATE CASCADE`.
+*   **Department to Subject**: One Department offers Many Subjects.
+    *   Technical Specification: `Subject.department_id` references `Department.id`. `ON DELETE SET NULL ON UPDATE CASCADE`.
+*   **Subject to Course**: One Subject has Many Courses.
+    *   Technical Specification: `Course.subject_id` references `Subject.id`. `ON DELETE RESTRICT ON UPDATE CASCADE`.
+*   **Teacher to Class**: One Teacher teaches Many Classes.
+    *   Technical Specification: `Class.teacher_id` references `Teacher.id`. `ON DELETE RESTRICT ON UPDATE CASCADE`.
+*   **Course to Class**: One Course has Many Class sections.
+    *   Technical Specification: `Class.course_id` references `Course.id`. `ON DELETE RESTRICT ON UPDATE CASCADE`.
+*   **Room to Class**: One Room hosts Many Classes (at different times).
+    *   Technical Specification: `Class.room_id` references `Room.id`. `ON DELETE RESTRICT ON UPDATE CASCADE`.
+*   **Class to Assignment**: One Class can have Many Assignments.
+    *   Technical Specification: `Assignment.class_id` references `Class.id`. `ON DELETE CASCADE ON UPDATE CASCADE`.
+*   **Student to Enrollment**: One Student can be enrolled in Many Classes.
+    *   Technical Specification: `Enrollment.student_id` references `Student.id`. `ON DELETE CASCADE ON UPDATE CASCADE`.
+
+### Many-to-Many Relationships:
+*   **Student and Class**: A student can enroll in multiple classes, and a class can have multiple students.
+    *   Resolution: This is resolved by the `Enrollment` junction table, containing `student_id` and `class_id` as foreign keys.
+    *   Technical Specification: `Enrollment.student_id` references `Student.id` `ON DELETE CASCADE ON UPDATE CASCADE`. `Enrollment.class_id` references `Class.id` `ON DELETE CASCADE ON UPDATE CASCADE`. A `UNIQUE` constraint on `(student_id, class_id)` ensures a student enrolls in a class only once.
+*   **Student and Assignment**: A student can receive grades for many assignments, and an assignment will have grades for many students.
+    *   Resolution: This is resolved by the `Grade` junction table, containing `assignment_id` and `student_id` as foreign keys.
+    *   Technical Specification: `Grade.assignment_id` references `Assignment.id` `ON DELETE CASCADE ON UPDATE CASCADE`. `Grade.student_id` references `Student.id` `ON DELETE CASCADE ON UPDATE CASCADE`. A `UNIQUE` constraint on `(assignment_id, student_id)` ensures a student has only one grade per assignment.
+
+## Complete CREATE TABLE Statements
+
+```sql
+-- Database: SchoolManagementSystem (SQLite)
+
+-- 1. Table: User
+CREATE TABLE User (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    user_type VARCHAR(10) NOT NULL CHECK (user_type IN ('Student', 'Teacher', 'Admin')),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Table: Department
+CREATE TABLE Department (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    department_name VARCHAR(100) UNIQUE NOT NULL,
+    head_of_department_id INTEGER,
+    description TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (head_of_department_id) REFERENCES Teacher(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- 3. Table: Teacher
+CREATE TABLE Teacher (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER UNIQUE NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    date_of_birth TEXT,
+    gender VARCHAR(10) CHECK (gender IN ('Male', 'Female', 'Other')),
+    address VARCHAR(255),
+    phone_number VARCHAR(20),
+    email VARCHAR(100) UNIQUE,
+    hire_date TEXT NOT NULL,
+    department_id INTEGER,
+    salary DECIMAL(10, 2),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (department_id) REFERENCES Department(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- 4. Table: Student
+CREATE TABLE Student (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER UNIQUE NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    date_of_birth TEXT,
+    gender VARCHAR(10) CHECK (gender IN ('Male', 'Female', 'Other')),
+    address VARCHAR(255),
+    phone_number VARCHAR(20),
+    email VARCHAR(100) UNIQUE,
+    enrollment_date TEXT NOT NULL,
+    grade_level INTEGER,
+    guardian_name VARCHAR(100),
+    guardian_phone VARCHAR(20),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- 5. Table: Subject
+CREATE TABLE Subject (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject_name VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT,
+    department_id INTEGER,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (department_id) REFERENCES Department(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- 6. Table: Course
+CREATE TABLE Course (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    course_code VARCHAR(20) UNIQUE NOT NULL,
+    course_name VARCHAR(100) NOT NULL,
+    subject_id INTEGER NOT NULL,
+    credits INTEGER NOT NULL CHECK (credits > 0),
+    description TEXT,
+    max_students INTEGER CHECK (max_students > 0),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (subject_id) REFERENCES Subject(id) ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- 7. Table: Room
+CREATE TABLE Room (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_number VARCHAR(10) UNIQUE NOT NULL,
+    capacity INTEGER NOT NULL CHECK (capacity > 0),
+    type VARCHAR(50),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 8. Table: Class
+CREATE TABLE Class (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    course_id INTEGER NOT NULL,
+    teacher_id INTEGER NOT NULL,
+    room_id INTEGER NOT NULL,
+    semester VARCHAR(20) NOT NULL,
+    academic_year INTEGER NOT NULL,
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL,
+    days_of_week VARCHAR(15) NOT NULL,
+    max_capacity INTEGER,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    CHECK (end_time > start_time),
+    UNIQUE (room_id, semester, academic_year, start_time, end_time, days_of_week),
+    UNIQUE (teacher_id, semester, academic_year, start_time, end_time, days_of_week),
+    FOREIGN KEY (course_id) REFERENCES Course(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (teacher_id) REFERENCES Teacher(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (room_id) REFERENCES Room(id) ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- 9. Table: Enrollment
+CREATE TABLE Enrollment (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    class_id INTEGER NOT NULL,
+    enrollment_date TEXT DEFAULT CURRENT_TIMESTAMP,
+    grade VARCHAR(5),
+    status VARCHAR(10) NOT NULL DEFAULT 'Enrolled' CHECK (status IN ('Enrolled', 'Withdrawn', 'Completed')),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (student_id, class_id),
+    FOREIGN KEY (student_id) REFERENCES Student(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (class_id) REFERENCES Class(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- 10. Table: Assignment
+CREATE TABLE Assignment (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    class_id INTEGER NOT NULL,
+    assignment_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    due_date TEXT NOT NULL,
+    max_score DECIMAL(5, 2) NOT NULL CHECK (max_score > 0),
+    weight DECIMAL(5, 2) NOT NULL CHECK (weight >= 0 AND weight <= 100),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (class_id) REFERENCES Class(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- 11. Table: Grade
+CREATE TABLE Grade (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    assignment_id INTEGER NOT NULL,
+    student_id INTEGER NOT NULL,
+    score DECIMAL(5, 2) NOT NULL CHECK (score >= 0),
+    submission_date TEXT,
+    feedback TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (assignment_id, student_id),
+    FOREIGN KEY (assignment_id) REFERENCES Assignment(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES Student(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Indexes
+
+CREATE UNIQUE INDEX idx_user_username ON User(username);
+CREATE UNIQUE INDEX idx_user_email ON User(email);
+
+CREATE UNIQUE INDEX idx_department_name ON Department(department_name);
+CREATE INDEX idx_department_head_of_department_id ON Department(head_of_department_id);
+
+CREATE UNIQUE INDEX idx_teacher_user_id ON Teacher(user_id);
+CREATE UNIQUE INDEX idx_teacher_email ON Teacher(email);
+CREATE INDEX idx_teacher_department_id ON Teacher(department_id);
+CREATE INDEX idx_teacher_last_name ON Teacher(last_name);
+
+CREATE UNIQUE INDEX idx_student_user_id ON Student(user_id);
+CREATE UNIQUE INDEX idx_student_email ON Student(email);
+CREATE INDEX idx_student_last_name ON Student(last_name);
+
+CREATE UNIQUE INDEX idx_subject_subject_name ON Subject(subject_name);
+CREATE INDEX idx_subject_department_id ON Subject(department_id);
+
+CREATE UNIQUE INDEX idx_course_course_code ON Course(course_code);
+CREATE INDEX idx_course_subject_id ON Course(subject_id);
+
+CREATE UNIQUE INDEX idx_room_room_number ON Room(room_number);
+
+CREATE INDEX idx_class_course_id ON Class(course_id);
+CREATE INDEX idx_class_teacher_id ON Class(teacher_id);
+CREATE INDEX idx_class_room_id ON Class(room_id);
+CREATE INDEX idx_class_semester_academic_year ON Class(semester, academic_year);
+
+CREATE INDEX idx_enrollment_student_id ON Enrollment(student_id);
+CREATE INDEX idx_enrollment_class_id ON Enrollment(class_id);
+
+CREATE INDEX idx_assignment_class_id ON Assignment(class_id);
+
+CREATE INDEX idx_grade_assignment_id ON Grade(assignment_id);
+CREATE INDEX idx_grade_student_id ON Grade(student_id);

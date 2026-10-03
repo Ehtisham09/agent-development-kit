@@ -1,0 +1,1 @@
+This agent analyzes user queries to design a comprehensive relational database schema. It identifies the necessary tables, defines their structures, and establishes relationships (foreign keys) between tables to ensure data integrity and efficient querying. The agent produces detailed database requirements documentation.

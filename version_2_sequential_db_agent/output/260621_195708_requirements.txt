@@ -1,0 +1,311 @@
+Database Requirements Document: Hospital Management System
+
+**1. Introduction**
+This document outlines the relational database schema for a Hospital Management System, designed to store and manage critical patient information, medical records, appointments, doctor details, and hospital resources. The primary goal is to ensure data integrity, minimize redundancy, and support efficient data retrieval for hospital operations.
+
+**2. Entities and Attributes**
+
+The system comprises the following entities (tables) and their corresponding attributes (columns):
+
+**Table: Patients**
+*   **Purpose:** Stores demographic and contact information for all registered patients.
+*   **Columns:**
+    *   `PatientID` (INT, PRIMARY KEY, AUTO_INCREMENT) - Unique identifier for each patient.
+    *   `FirstName` (VARCHAR(50), NOT NULL) - Patient's first name.
+    *   `LastName` (VARCHAR(50), NOT NULL) - Patient's last name.
+    *   `DateOfBirth` (DATE, NOT NULL) - Patient's date of birth.
+    *   `Gender` (ENUM('Male', 'Female', 'Other'), NOT NULL) - Patient's gender.
+    *   `Address` (VARCHAR(255)) - Patient's full address.
+    *   `PhoneNumber` (VARCHAR(20), UNIQUE, NOT NULL) - Patient's primary phone number.
+    *   `Email` (VARCHAR(100), UNIQUE) - Patient's email address.
+    *   `BloodGroup` (ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-')) - Patient's blood group.
+    *   `EmergencyContactName` (VARCHAR(100), NOT NULL) - Name of emergency contact.
+    *   `EmergencyContactNumber` (VARCHAR(20), NOT NULL) - Phone number of emergency contact.
+    *   `CreatedDate` (DATETIME, DEFAULT CURRENT_TIMESTAMP) - Timestamp when the record was created.
+
+**Table: Doctors**
+*   **Purpose:** Stores information about medical practitioners.
+*   **Columns:**
+    *   `DoctorID` (INT, PRIMARY KEY, AUTO_INCREMENT) - Unique identifier for each doctor.
+    *   `FirstName` (VARCHAR(50), NOT NULL) - Doctor's first name.
+    *   `LastName` (VARCHAR(50), NOT NULL) - Doctor's last name.
+    *   `Specialization` (VARCHAR(100), NOT NULL) - Doctor's medical specialization (e.g., Cardiology, Pediatrics).
+    *   `PhoneNumber` (VARCHAR(20), UNIQUE, NOT NULL) - Doctor's primary phone number.
+    *   `Email` (VARCHAR(100), UNIQUE) - Doctor's email address.
+    *   `LicenseNumber` (VARCHAR(50), UNIQUE, NOT NULL) - Doctor's medical license number.
+    *   `DepartmentID` (INT, FOREIGN KEY) - ID of the department the doctor belongs to. (Forward reference, will define Departments first in SQL)
+
+**Table: Departments**
+*   **Purpose:** Stores information about different departments within the hospital.
+*   **Columns:**
+    *   `DepartmentID` (INT, PRIMARY KEY, AUTO_INCREMENT) - Unique identifier for each department.
+    *   `DepartmentName` (VARCHAR(100), UNIQUE, NOT NULL) - Name of the department (e.g., Cardiology, Oncology).
+    *   `HeadOfDepartment` (INT, FOREIGN KEY) - `DoctorID` of the doctor leading this department (NULLable if no head assigned).
+    *   `ContactNumber` (VARCHAR(20)) - Department's contact number.
+
+**Table: Appointments**
+*   **Purpose:** Manages scheduled appointments between patients and doctors.
+*   **Columns:**
+    *   `AppointmentID` (INT, PRIMARY KEY, AUTO_INCREMENT) - Unique identifier for each appointment.
+    *   `PatientID` (INT, FOREIGN KEY, NOT NULL) - Foreign key referencing `Patients.PatientID`.
+    *   `DoctorID` (INT, FOREIGN KEY, NOT NULL) - Foreign key referencing `Doctors.DoctorID`.
+    *   `AppointmentDate` (DATE, NOT NULL) - Date of the appointment.
+    *   `AppointmentTime` (TIME, NOT NULL) - Time of the appointment.
+    *   `ReasonForVisit` (TEXT) - Patient's stated reason for the visit.
+    *   `Status` (ENUM('Scheduled', 'Completed', 'Cancelled', 'No-Show'), NOT NULL, DEFAULT 'Scheduled') - Current status of the appointment.
+    *   `CreatedDate` (DATETIME, DEFAULT CURRENT_TIMESTAMP) - Timestamp when the appointment was created.
+
+**Table: MedicalRecords**
+*   **Purpose:** Stores a comprehensive history of patient visits, diagnoses, and treatments.
+*   **Columns:**
+    *   `RecordID` (INT, PRIMARY KEY, AUTO_INCREMENT) - Unique identifier for each medical record entry.
+    *   `PatientID` (INT, FOREIGN KEY, NOT NULL) - Foreign key referencing `Patients.PatientID`.
+    *   `DoctorID` (INT, FOREIGN KEY, NOT NULL) - Foreign key referencing `Doctors.DoctorID`.
+    *   `AppointmentID` (INT, FOREIGN KEY, UNIQUE) - Foreign key referencing `Appointments.AppointmentID`. Ensures one record per appointment.
+    *   `DateOfVisit` (DATE, NOT NULL) - Date of the visit.
+    *   `Diagnosis` (TEXT, NOT NULL) - Doctor's diagnosis for the patient's condition.
+    *   `Treatment` (TEXT) - Details of the treatment provided.
+    *   `Notes` (TEXT) - Any additional notes from the doctor.
+    *   `LastUpdatedDate` (DATETIME, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) - Timestamp of the last update to the record.
+
+**Table: Medications**
+*   **Purpose:** Catalogs all available medications.
+*   **Columns:**
+    *   `MedicationID` (INT, PRIMARY KEY, AUTO_INCREMENT) - Unique identifier for each medication.
+    *   `MedicationName` (VARCHAR(150), UNIQUE, NOT NULL) - Name of the medication.
+    *   `DosageForm` (VARCHAR(50)) - e.g., 'Tablet', 'Capsule', 'Syrup', 'Injection'.
+    *   `Strength` (VARCHAR(50)) - e.g., '500mg', '10mg/ml'.
+    *   `Description` (TEXT) - Detailed description of the medication.
+
+**Table: Prescriptions**
+*   **Purpose:** Links medical records to specific medications prescribed during a visit (many-to-many relationship).
+*   **Columns:**
+    *   `PrescriptionID` (INT, PRIMARY KEY, AUTO_INCREMENT) - Unique identifier for each prescription entry.
+    *   `RecordID` (INT, FOREIGN KEY, NOT NULL) - Foreign key referencing `MedicalRecords.RecordID`.
+    *   `MedicationID` (INT, FOREIGN KEY, NOT NULL) - Foreign key referencing `Medications.MedicationID`.
+    *   `Quantity` (INT, NOT NULL) - Quantity of the medication prescribed.
+    *   `Instructions` (TEXT, NOT NULL) - Usage instructions for the patient.
+    *   `PrescriptionDate` (DATETIME, DEFAULT CURRENT_TIMESTAMP) - Date the prescription was issued.
+
+**Table: Rooms**
+*   **Purpose:** Manages hospital rooms and their types/status.
+*   **Columns:**
+    *   `RoomID` (INT, PRIMARY KEY, AUTO_INCREMENT) - Unique identifier for each room.
+    *   `RoomNumber` (VARCHAR(10), UNIQUE, NOT NULL) - Unique identifier for the room (e.g., '101', 'ICU-A').
+    *   `RoomType` (ENUM('General', 'Private', 'ICU', 'Emergency', 'Operation Theater'), NOT NULL) - Type of room.
+    *   `DepartmentID` (INT, FOREIGN KEY) - Foreign key referencing `Departments.DepartmentID` (e.g., ICU rooms belong to the Critical Care department).
+    *   `Capacity` (INT, NOT NULL, DEFAULT 1) - Maximum number of beds/patients the room can accommodate.
+    *   `Status` (ENUM('Available', 'Occupied', 'Under Maintenance', 'Cleaning'), NOT NULL, DEFAULT 'Available') - Current status of the room.
+
+**Table: Admissions**
+*   **Purpose:** Records patient admissions and discharges, linking them to specific rooms.
+*   **Columns:**
+    *   `AdmissionID` (INT, PRIMARY KEY, AUTO_INCREMENT) - Unique identifier for each admission.
+    *   `PatientID` (INT, FOREIGN KEY, NOT NULL) - Foreign key referencing `Patients.PatientID`.
+    *   `RoomID` (INT, FOREIGN KEY, NOT NULL) - Foreign key referencing `Rooms.RoomID`.
+    *   `AdmissionDate` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP) - Date and time of admission.
+    *   `DischargeDate` (DATETIME) - Date and time of discharge (NULL if patient is currently admitted).
+    *   `ReasonForAdmission` (TEXT) - Clinical reason for admission.
+    *   `AdmittingDoctorID` (INT, FOREIGN KEY) - Foreign key referencing `Doctors.DoctorID` (the doctor who admitted the patient).
+
+**3. Relationships**
+
+*   **One-to-Many Relationships:**
+    *   `Departments` to `Doctors`: One department can have multiple doctors. (`Doctors.DepartmentID` references `Departments.DepartmentID`).
+    *   `Departments` to `Rooms`: One department can manage multiple rooms. (`Rooms.DepartmentID` references `Departments.DepartmentID`).
+    *   `Patients` to `Appointments`: One patient can have many appointments. (`Appointments.PatientID` references `Patients.PatientID`).
+    *   `Doctors` to `Appointments`: One doctor can have many appointments. (`Appointments.DoctorID` references `Doctors.DoctorID`).
+    *   `Patients` to `MedicalRecords`: One patient can have many medical records. (`MedicalRecords.PatientID` references `Patients.PatientID`).
+    *   `Doctors` to `MedicalRecords`: One doctor can create many medical records. (`MedicalRecords.DoctorID` references `Doctors.DoctorID`).
+    *   `Patients` to `Admissions`: One patient can have multiple admissions over time. (`Admissions.PatientID` references `Patients.PatientID`).
+    *   `Rooms` to `Admissions`: One room can house multiple admissions over time (but only one active at a time for `Room.Status`). (`Admissions.RoomID` references `Rooms.RoomID`).
+    *   `Doctors` to `Admissions`: One doctor can admit multiple patients. (`Admissions.AdmittingDoctorID` references `Doctors.DoctorID`).
+
+*   **One-to-One Relationships (or close to it):**
+    *   `Appointments` to `MedicalRecords`: An appointment typically results in one medical record. (`MedicalRecords.AppointmentID` references `Appointments.AppointmentID` with a `UNIQUE` constraint).
+    *   `Departments` to `Doctors` (for Head of Department): A department has one head of department, who is a doctor. (`Departments.HeadOfDepartment` references `Doctors.DoctorID`). This is not strictly one-to-one on the `Doctors` side as a doctor can be head of zero or one department.
+
+*   **Many-to-Many Relationships:**
+    *   `MedicalRecords` to `Medications`: A medical record can include multiple prescribed medications, and a medication can be prescribed in multiple medical records. This is resolved via the `Prescriptions` junction table.
+        *   `MedicalRecords` 1--M `Prescriptions` M--1 `Medications`
+
+**4. Normalization Level**
+
+The schema is designed to achieve **Third Normal Form (3NF)**.
+
+*   **1NF (First Normal Form):** All tables have primary keys, and all columns contain atomic values (no repeating groups or multi-valued attributes).
+*   **2NF (Second Normal Form):** All non-key attributes are fully functionally dependent on the primary key. This is ensured by having appropriate primary keys and separating concerns into different tables (e.g., `Patients` data is only about patients, `Doctors` about doctors, etc.).
+*   **3NF (Third Normal Form):** All non-key attributes are non-transitively dependent on the primary key. This means there are no transitive dependencies where a non-key attribute depends on another non-key attribute. For example, `MedicationName`, `DosageForm`, and `Strength` depend directly on `MedicationID` in the `Medications` table, not on any other non-key attribute. The `Departments.HeadOfDepartment` directly references `DoctorID` and avoids storing doctor details directly in `Departments`.
+
+**Design Justifications:**
+*   **Separation of Concerns:** Each entity has its own table, reducing redundancy and improving data integrity.
+*   **Foreign Keys:** Extensive use of foreign keys ensures referential integrity, preventing orphaned records and maintaining consistency across related data.
+*   **Junction Table (`Prescriptions`):** Properly handles the many-to-many relationship between `MedicalRecords` and `Medications`.
+
+**5. Indexes and Performance Considerations**
+
+Indexes are crucial for optimizing query performance, especially on large datasets.
+
+*   **Primary Keys:** Automatically indexed for fast lookups.
+*   **Foreign Keys:** Indexing foreign key columns is highly recommended to speed up JOIN operations.
+    *   `Appointments.PatientID`, `Appointments.DoctorID`
+    *   `MedicalRecords.PatientID`, `MedicalRecords.DoctorID`, `MedicalRecords.AppointmentID`
+    *   `Prescriptions.RecordID`, `Prescriptions.MedicationID`
+    *   `Doctors.DepartmentID`
+    *   `Departments.HeadOfDepartment`
+    *   `Rooms.DepartmentID`
+    *   `Admissions.PatientID`, `Admissions.RoomID`, `Admissions.AdmittingDoctorID`
+*   **Unique Constraints:** Columns with `UNIQUE` constraints are also automatically indexed.
+    *   `Patients.PhoneNumber`, `Patients.Email`
+    *   `Doctors.PhoneNumber`, `Doctors.Email`, `Doctors.LicenseNumber`
+    *   `Departments.DepartmentName`
+    *   `Medications.MedicationName`
+    *   `Rooms.RoomNumber`
+*   **Frequently Queried Columns:** Consider indexing columns frequently used in `WHERE` clauses, `ORDER BY` clauses, or for filtering data.
+    *   `Patients.LastName`, `Patients.FirstName`, `Patients.DateOfBirth`
+    *   `Doctors.LastName`, `Doctors.FirstName`, `Doctors.Specialization`
+    *   `Appointments.AppointmentDate`, `Appointments.Status`
+    *   `MedicalRecords.DateOfVisit`
+    *   `Admissions.AdmissionDate`, `Admissions.DischargeDate`
+
+**6. SQL CREATE TABLE Statements (MySQL Syntax)**
+
+```sql
+-- Table: Departments
+CREATE TABLE Departments (
+    DepartmentID INT AUTO_INCREMENT PRIMARY KEY,
+    DepartmentName VARCHAR(100) UNIQUE NOT NULL,
+    HeadOfDepartment INT, -- Will add FK constraint after Doctors table
+    ContactNumber VARCHAR(20)
+);
+
+-- Table: Doctors
+CREATE TABLE Doctors (
+    DoctorID INT AUTO_INCREMENT PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Specialization VARCHAR(100) NOT NULL,
+    PhoneNumber VARCHAR(20) UNIQUE NOT NULL,
+    Email VARCHAR(100) UNIQUE,
+    LicenseNumber VARCHAR(50) UNIQUE NOT NULL,
+    DepartmentID INT,
+    FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID)
+);
+
+-- Add FK for HeadOfDepartment after Doctors table is created
+ALTER TABLE Departments
+ADD CONSTRAINT fk_head_of_department
+FOREIGN KEY (HeadOfDepartment) REFERENCES Doctors(DoctorID);
+
+-- Table: Patients
+CREATE TABLE Patients (
+    PatientID INT AUTO_INCREMENT PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    DateOfBirth DATE NOT NULL,
+    Gender ENUM('Male', 'Female', 'Other') NOT NULL,
+    Address VARCHAR(255),
+    PhoneNumber VARCHAR(20) UNIQUE NOT NULL,
+    Email VARCHAR(100) UNIQUE,
+    BloodGroup ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'),
+    EmergencyContactName VARCHAR(100) NOT NULL,
+    EmergencyContactNumber VARCHAR(20) NOT NULL,
+    CreatedDate DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: Appointments
+CREATE TABLE Appointments (
+    AppointmentID INT AUTO_INCREMENT PRIMARY KEY,
+    PatientID INT NOT NULL,
+    DoctorID INT NOT NULL,
+    AppointmentDate DATE NOT NULL,
+    AppointmentTime TIME NOT NULL,
+    ReasonForVisit TEXT,
+    Status ENUM('Scheduled', 'Completed', 'Cancelled', 'No-Show') NOT NULL DEFAULT 'Scheduled',
+    CreatedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (PatientID) REFERENCES Patients(PatientID),
+    FOREIGN KEY (DoctorID) REFERENCES Doctors(DoctorID)
+);
+
+-- Table: MedicalRecords
+CREATE TABLE MedicalRecords (
+    RecordID INT AUTO_INCREMENT PRIMARY KEY,
+    PatientID INT NOT NULL,
+    DoctorID INT NOT NULL,
+    AppointmentID INT UNIQUE, -- Ensures one medical record per appointment
+    DateOfVisit DATE NOT NULL,
+    Diagnosis TEXT NOT NULL,
+    Treatment TEXT,
+    Notes TEXT,
+    LastUpdatedDate DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (PatientID) REFERENCES Patients(PatientID),
+    FOREIGN KEY (DoctorID) REFERENCES Doctors(DoctorID),
+    FOREIGN KEY (AppointmentID) REFERENCES Appointments(AppointmentID)
+);
+
+-- Table: Medications
+CREATE TABLE Medications (
+    MedicationID INT AUTO_INCREMENT PRIMARY KEY,
+    MedicationName VARCHAR(150) UNIQUE NOT NULL,
+    DosageForm VARCHAR(50),
+    Strength VARCHAR(50),
+    Description TEXT
+);
+
+-- Table: Prescriptions (Junction Table for MedicalRecords and Medications)
+CREATE TABLE Prescriptions (
+    PrescriptionID INT AUTO_INCREMENT PRIMARY KEY,
+    RecordID INT NOT NULL,
+    MedicationID INT NOT NULL,
+    Quantity INT NOT NULL,
+    Instructions TEXT NOT NULL,
+    PrescriptionDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (RecordID) REFERENCES MedicalRecords(RecordID),
+    FOREIGN KEY (MedicationID) REFERENCES Medications(MedicationID),
+    UNIQUE (RecordID, MedicationID) -- Prevents duplicate prescription of same medication in same record
+);
+
+-- Table: Rooms
+CREATE TABLE Rooms (
+    RoomID INT AUTO_INCREMENT PRIMARY KEY,
+    RoomNumber VARCHAR(10) UNIQUE NOT NULL,
+    RoomType ENUM('General', 'Private', 'ICU', 'Emergency', 'Operation Theater') NOT NULL,
+    DepartmentID INT,
+    Capacity INT NOT NULL DEFAULT 1,
+    Status ENUM('Available', 'Occupied', 'Under Maintenance', 'Cleaning') NOT NULL DEFAULT 'Available',
+    FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID)
+);
+
+-- Table: Admissions
+CREATE TABLE Admissions (
+    AdmissionID INT AUTO_INCREMENT PRIMARY KEY,
+    PatientID INT NOT NULL,
+    RoomID INT NOT NULL,
+    AdmissionDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    DischargeDate DATETIME, -- NULL if currently admitted
+    ReasonForAdmission TEXT,
+    AdmittingDoctorID INT,
+    FOREIGN KEY (PatientID) REFERENCES Patients(PatientID),
+    FOREIGN KEY (RoomID) REFERENCES Rooms(RoomID),
+    FOREIGN KEY (AdmittingDoctorID) REFERENCES Doctors(DoctorID)
+);
+```
+
+**7. Data Integrity Constraints and Business Rules**
+
+*   **Referential Integrity:** Enforced by foreign key constraints, ensuring that related data across tables remains consistent. For example, an `Appointment` cannot exist without a valid `PatientID` and `DoctorID`.
+*   **Uniqueness:**
+    *   Patient phone numbers and emails must be unique.
+    *   Doctor phone numbers, emails, and license numbers must be unique.
+    *   Department names must be unique.
+    *   Medication names must be unique.
+    *   Room numbers must be unique.
+    *   Each `Appointment` can have at most one `MedicalRecord`.
+    *   A specific medication can only be prescribed once per `MedicalRecord` (enforced by `UNIQUE (RecordID, MedicationID)` in `Prescriptions`).
+*   **Not Null Constraints:** Critical fields like names, dates of birth, phone numbers, and essential medical information cannot be empty, ensuring data completeness.
+*   **Domain Constraints:** `ENUM` types are used for fields like `Gender`, `BloodGroup`, `AppointmentStatus`, `RoomType`, and `RoomStatus` to restrict values to a predefined set, improving data quality.
+*   **Default Values:** `CreatedDate` and `Status` fields have default values to simplify data entry and ensure initial state consistency.
+*   **Temporal Constraints:** `DischargeDate` in `Admissions` must be greater than or equal to `AdmissionDate` (this would typically be enforced at the application layer or with database triggers).
+*   **Room Occupancy:** When a patient is admitted, the `Rooms.Status` for the assigned room should be updated to 'Occupied'. When discharged, it should be updated to 'Available' (application layer logic or triggers).
+*   **Head of Department:** A doctor can only be the head of one department at a time (application layer logic or a unique constraint on `HeadOfDepartment` in `Departments` if a doctor cannot lead multiple departments).
+This document provides a robust foundation for building the Hospital Management System database.

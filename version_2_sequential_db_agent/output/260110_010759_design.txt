@@ -1,0 +1,578 @@
+Hospital Management System
+
+## Global Database Design System
+
+### Data Type Standards:
+*   **Identifiers**: `INTEGER PRIMARY KEY AUTOINCREMENT`
+*   **Text Fields (Short)**: `VARCHAR(255)`
+*   **Text Fields (Long)**: `TEXT`
+*   **Dates**: `DATE` (for YYYY-MM-DD) or `TIMESTAMP` (for YYYY-MM-DD HH:MM:SS, often stored as `TEXT` in SQLite)
+*   **Booleans**: `BOOLEAN` (or `INTEGER` 0/1)
+*   **Decimal Numbers**: `DECIMAL(10,2)` (often stored as `REAL` or `NUMERIC` in SQLite)
+
+### Naming Conventions:
+*   **Table Names**: Singular, PascalCase (e.g., Patient, Doctor, Appointment)
+*   **Column Names**: snake_case (e.g., patient_id, created_at, email_address)
+*   **Primary Keys**: id (table-agnostic)
+*   **Foreign Keys**: [referenced_table]_id
+
+### Constraint Standards:
+*   All tables must have a primary key (`id INTEGER PRIMARY KEY AUTOINCREMENT`).
+*   Foreign keys must include `ON DELETE` and `ON UPDATE` rules (`CASCADE`, `SET NULL`, `RESTRICT`). For this system, `ON DELETE CASCADE` is generally appropriate for dependent child records, `SET NULL` where the child record can exist without the parent, and `RESTRICT` for critical parent records that should not be deleted if children exist.
+    *   For `Patients`, `Doctors`, `Departments`: `ON DELETE RESTRICT` to prevent accidental deletion of parent records.
+    *   For junction tables and strong dependencies: `ON DELETE CASCADE`.
+    *   For `room_id` in `Admissions` (optional room assignment): `ON DELETE SET NULL`.
+*   Important fields should have `NOT NULL` constraints.
+*   Email, phone_number, username, license_number, room_number, department_name, medication_name fields should have `UNIQUE` constraints where applicable.
+
+### Indexing Strategy:
+*   Create indexes on:
+    *   All foreign key columns
+    *   Frequently searched columns
+    *   Columns used in `JOIN` operations
+    *   Unique identifiers (automatically indexed by `UNIQUE` constraints and `PRIMARY KEY`)
+
+## Core Table Standards
+
+### Standard Timestamp Columns:
+Every table should include:
+*   `created_at`: `TIMESTAMP DEFAULT CURRENT_TIMESTAMP`
+*   `updated_at`: `TIMESTAMP DEFAULT CURRENT_TIMESTAMP` (For SQLite, this will be handled by application logic or triggers if required for automatic updates).
+
+### Standard ID Columns:
+Every table must have a primary key:
+*   `id`: `INTEGER PRIMARY KEY AUTOINCREMENT`
+
+## Table Design Details
+
+### Patient:
+Purpose: Stores demographic and contact information for all registered patients.
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `first_name`: VARCHAR(100) NOT NULL
+*   `last_name`: VARCHAR(100) NOT NULL
+*   `date_of_birth`: DATE NOT NULL
+*   `gender`: VARCHAR(10) NOT NULL
+*   `address`: VARCHAR(255)
+*   `phone_number`: VARCHAR(20) NOT NULL UNIQUE
+*   `email`: VARCHAR(100) UNIQUE
+*   `blood_group`: VARCHAR(5)
+*   `registration_date`: TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Patient has Many Appointment (foreign key: Appointment.patient_id)
+*   One Patient has Many Admission (foreign key: Admission.patient_id)
+*   One Patient has Many MedicalRecord (foreign key: MedicalRecord.patient_id)
+*   One Patient has Many Prescription (foreign key: Prescription.patient_id)
+*   One Patient has Many Bill (foreign key: Bill.patient_id)
+Indexes:
+*   CREATE INDEX idx_patient_first_last_name ON Patient(first_name, last_name)
+*   CREATE INDEX idx_patient_phone_number ON Patient(phone_number)
+*   CREATE INDEX idx_patient_email ON Patient(email)
+
+### Department:
+Purpose: Lists the different departments within the hospital.
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `department_name`: VARCHAR(100) NOT NULL UNIQUE
+*   `description`: TEXT
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Department has Many Doctor (foreign key: Doctor.department_id)
+*   One Department has Many Staff (foreign key: Staff.department_id)
+Indexes:
+*   CREATE INDEX idx_department_name ON Department(department_name)
+
+### Doctor:
+Purpose: Stores information about doctors and their specializations.
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `first_name`: VARCHAR(100) NOT NULL
+*   `last_name`: VARCHAR(100) NOT NULL
+*   `specialization`: VARCHAR(100) NOT NULL
+*   `phone_number`: VARCHAR(20) UNIQUE
+*   `email`: VARCHAR(100) UNIQUE
+*   `license_number`: VARCHAR(50) NOT NULL UNIQUE
+*   `department_id`: INTEGER NOT NULL
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Doctor belongs to One Department (foreign key: Doctor.department_id references Department.id)
+*   One Doctor has Many Appointment (foreign key: Appointment.doctor_id)
+*   One Doctor has Many Admission (foreign key: Admission.admitting_doctor_id)
+*   One Doctor has Many MedicalRecord (foreign key: MedicalRecord.doctor_id)
+*   One Doctor has Many Prescription (foreign key: Prescription.doctor_id)
+Indexes:
+*   CREATE INDEX idx_doctor_first_last_name ON Doctor(first_name, last_name)
+*   CREATE INDEX idx_doctor_specialization ON Doctor(specialization)
+*   CREATE INDEX idx_doctor_department_id ON Doctor(department_id)
+*   CREATE INDEX idx_doctor_license_number ON Doctor(license_number)
+
+### Staff:
+Purpose: Stores information about non-medical hospital staff (e.g., nurses, administrative staff).
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `first_name`: VARCHAR(100) NOT NULL
+*   `last_name`: VARCHAR(100) NOT NULL
+*   `role`: VARCHAR(100) NOT NULL
+*   `phone_number`: VARCHAR(20) UNIQUE
+*   `email`: VARCHAR(100) UNIQUE
+*   `department_id`: INTEGER
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Staff member belongs to One Department (foreign key: Staff.department_id references Department.id)
+Indexes:
+*   CREATE INDEX idx_staff_department_id ON Staff(department_id)
+*   CREATE INDEX idx_staff_phone_number ON Staff(phone_number)
+*   CREATE INDEX idx_staff_email ON Staff(email)
+
+### Room:
+Purpose: Manages details of hospital rooms, including their type and current availability.
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `room_number`: VARCHAR(10) NOT NULL UNIQUE
+*   `room_type`: VARCHAR(50) NOT NULL
+*   `capacity`: INTEGER NOT NULL DEFAULT 1
+*   `current_occupancy`: INTEGER NOT NULL DEFAULT 0
+*   `is_available`: BOOLEAN NOT NULL DEFAULT TRUE (stored as INTEGER 0/1 in SQLite)
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Room has Many Admission (foreign key: Admission.room_id)
+Indexes:
+*   CREATE INDEX idx_room_number ON Room(room_number)
+
+### Admission:
+Purpose: Records patient admissions and discharge information.
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `patient_id`: INTEGER NOT NULL
+*   `admission_date`: TIMESTAMP NOT NULL
+*   `discharge_date`: TIMESTAMP
+*   `room_id`: INTEGER
+*   `admitting_doctor_id`: INTEGER NOT NULL
+*   `initial_diagnosis`: TEXT
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Admission belongs to One Patient (foreign key: Admission.patient_id references Patient.id)
+*   One Admission is assigned to One Room (foreign key: Admission.room_id references Room.id)
+*   One Admission is overseen by One Doctor (foreign key: Admission.admitting_doctor_id references Doctor.id)
+*   One Admission has Many MedicalRecord (foreign key: MedicalRecord.admission_id)
+*   One Admission has Many Bill (foreign key: Bill.admission_id)
+Indexes:
+*   CREATE INDEX idx_admission_patient_id ON Admission(patient_id)
+*   CREATE INDEX idx_admission_room_id ON Admission(room_id)
+*   CREATE INDEX idx_admission_admitting_doctor_id ON Admission(admitting_doctor_id)
+*   CREATE INDEX idx_admission_dates ON Admission(admission_date, discharge_date)
+
+### Appointment:
+Purpose: Manages scheduled appointments between patients and doctors.
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `patient_id`: INTEGER NOT NULL
+*   `doctor_id`: INTEGER NOT NULL
+*   `appointment_date_time`: TIMESTAMP NOT NULL
+*   `status`: VARCHAR(50) NOT NULL DEFAULT 'Scheduled'
+*   `reason_for_visit`: TEXT
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Appointment belongs to One Patient (foreign key: Appointment.patient_id references Patient.id)
+*   One Appointment is with One Doctor (foreign key: Appointment.doctor_id references Doctor.id)
+Indexes:
+*   CREATE INDEX idx_appointment_patient_id ON Appointment(patient_id)
+*   CREATE INDEX idx_appointment_doctor_id ON Appointment(doctor_id)
+*   CREATE UNIQUE INDEX uq_appointment_doctor_date_time ON Appointment(doctor_id, appointment_date_time)
+
+### MedicalRecord:
+Purpose: Stores detailed medical history, diagnoses, and treatments for patients.
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `patient_id`: INTEGER NOT NULL
+*   `doctor_id`: INTEGER NOT NULL
+*   `record_date_time`: TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+*   `admission_id`: INTEGER
+*   `diagnosis`: TEXT NOT NULL
+*   `treatment`: TEXT
+*   `notes`: TEXT
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One MedicalRecord belongs to One Patient (foreign key: MedicalRecord.patient_id references Patient.id)
+*   One MedicalRecord is created by One Doctor (foreign key: MedicalRecord.doctor_id references Doctor.id)
+*   One MedicalRecord can be linked to One Admission (foreign key: MedicalRecord.admission_id references Admission.id)
+Indexes:
+*   CREATE INDEX idx_medical_record_patient_id ON MedicalRecord(patient_id)
+*   CREATE INDEX idx_medical_record_doctor_id ON MedicalRecord(doctor_id)
+*   CREATE INDEX idx_medical_record_admission_id ON MedicalRecord(admission_id)
+*   CREATE INDEX idx_medical_record_date_time ON MedicalRecord(record_date_time)
+
+### Medication:
+Purpose: Catalogs all available medications in the hospital pharmacy.
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `medication_name`: VARCHAR(255) NOT NULL UNIQUE
+*   `generic_name`: VARCHAR(255)
+*   `description`: TEXT
+*   `stock_quantity`: INTEGER NOT NULL DEFAULT 0
+*   `unit_price`: DECIMAL(10,2) NOT NULL DEFAULT 0.00
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Medication can be part of Many PrescriptionItem (foreign key: PrescriptionItem.medication_id)
+Indexes:
+*   CREATE INDEX idx_medication_name ON Medication(medication_name)
+
+### Prescription:
+Purpose: Records prescriptions issued to patients by doctors.
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `patient_id`: INTEGER NOT NULL
+*   `doctor_id`: INTEGER NOT NULL
+*   `prescription_date`: TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+*   `notes`: TEXT
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Prescription is for One Patient (foreign key: Prescription.patient_id references Patient.id)
+*   One Prescription is issued by One Doctor (foreign key: Prescription.doctor_id references Doctor.id)
+*   One Prescription has Many PrescriptionItem (foreign key: PrescriptionItem.prescription_id)
+Indexes:
+*   CREATE INDEX idx_prescription_patient_id ON Prescription(patient_id)
+*   CREATE INDEX idx_prescription_doctor_id ON Prescription(doctor_id)
+*   CREATE INDEX idx_prescription_date ON Prescription(prescription_date)
+
+### PrescriptionItem:
+Purpose: Details the individual medications, dosages, and frequencies within a prescription. This is a junction table for a many-to-many relationship between Prescription and Medication.
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `prescription_id`: INTEGER NOT NULL
+*   `medication_id`: INTEGER NOT NULL
+*   `dosage`: VARCHAR(100) NOT NULL
+*   `frequency`: VARCHAR(100) NOT NULL
+*   `duration`: VARCHAR(100)
+*   `quantity_prescribed`: INTEGER NOT NULL
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One PrescriptionItem belongs to One Prescription (foreign key: PrescriptionItem.prescription_id references Prescription.id)
+*   One PrescriptionItem references One Medication (foreign key: PrescriptionItem.medication_id references Medication.id)
+Indexes:
+*   CREATE INDEX idx_prescription_item_prescription_id ON PrescriptionItem(prescription_id)
+*   CREATE INDEX idx_prescription_item_medication_id ON PrescriptionItem(medication_id)
+*   CREATE UNIQUE INDEX uq_prescription_item ON PrescriptionItem(prescription_id, medication_id)
+
+### Bill:
+Purpose: Manages financial bills generated for patients, services, and payments.
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `patient_id`: INTEGER NOT NULL
+*   `admission_id`: INTEGER
+*   `bill_date`: TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+*   `total_amount`: DECIMAL(10,2) NOT NULL DEFAULT 0.00
+*   `amount_paid`: DECIMAL(10,2) NOT NULL DEFAULT 0.00
+*   `due_date`: DATE
+*   `payment_status`: VARCHAR(50) NOT NULL DEFAULT 'Pending'
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One Bill is for One Patient (foreign key: Bill.patient_id references Patient.id)
+*   One Bill can be related to One Admission (foreign key: Bill.admission_id references Admission.id)
+*   One Bill has Many BillItem (foreign key: BillItem.bill_id)
+Indexes:
+*   CREATE INDEX idx_bill_patient_id ON Bill(patient_id)
+*   CREATE INDEX idx_bill_admission_id ON Bill(admission_id)
+*   CREATE INDEX idx_bill_date ON Bill(bill_date)
+*   CREATE INDEX idx_bill_payment_status ON Bill(payment_status)
+
+### BillItem:
+Purpose: Details the individual charges/services within a bill.
+Fields:
+*   `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+*   `bill_id`: INTEGER NOT NULL
+*   `service_description`: VARCHAR(255) NOT NULL
+*   `quantity`: INTEGER NOT NULL DEFAULT 1
+*   `unit_price`: DECIMAL(10,2) NOT NULL DEFAULT 0.00
+*   `item_amount`: DECIMAL(10,2) NOT NULL
+*   `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+*   `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+Relationships:
+*   One BillItem belongs to One Bill (foreign key: BillItem.bill_id references Bill.id)
+Indexes:
+*   CREATE INDEX idx_bill_item_bill_id ON BillItem(bill_id)
+
+## Relationships and Constraints
+
+*   **Patient to Appointment (One-to-Many)**: `Appointment.patient_id` references `Patient.id` `ON DELETE RESTRICT ON UPDATE CASCADE`.
+*   **Patient to Admission (One-to-Many)**: `Admission.patient_id` references `Patient.id` `ON DELETE RESTRICT ON UPDATE CASCADE`.
+*   **Patient to MedicalRecord (One-to-Many)**: `MedicalRecord.patient_id` references `Patient.id` `ON DELETE RESTRICT ON UPDATE CASCADE`.
+*   **Patient to Prescription (One-to-Many)**: `Prescription.patient_id` references `Patient.id` `ON DELETE RESTRICT ON UPDATE CASCADE`.
+*   **Patient to Bill (One-to-Many)**: `Bill.patient_id` references `Patient.id` `ON DELETE RESTRICT ON UPDATE CASCADE`.
+
+*   **Doctor to Appointment (One-to-Many)**: `Appointment.doctor_id` references `Doctor.id` `ON DELETE RESTRICT ON UPDATE CASCADE`.
+*   **Doctor to Admission (One-to-Many)**: `Admission.admitting_doctor_id` references `Doctor.id` `ON DELETE RESTRICT ON UPDATE CASCADE`.
+*   **Doctor to MedicalRecord (One-to-Many)**: `MedicalRecord.doctor_id` references `Doctor.id` `ON DELETE RESTRICT ON UPDATE CASCADE`.
+*   **Doctor to Prescription (One-to-Many)**: `Prescription.doctor_id` references `Doctor.id` `ON DELETE RESTRICT ON UPDATE CASCADE`.
+
+*   **Department to Doctor (One-to-Many)**: `Doctor.department_id` references `Department.id` `ON DELETE RESTRICT ON UPDATE CASCADE`.
+*   **Department to Staff (One-to-Many)**: `Staff.department_id` references `Department.id` `ON DELETE SET NULL ON UPDATE CASCADE`.
+
+*   **Room to Admission (One-to-Many)**: `Admission.room_id` references `Room.id` `ON DELETE SET NULL ON UPDATE CASCADE`.
+
+*   **Admission to MedicalRecord (One-to-Many)**: `MedicalRecord.admission_id` references `Admission.id` `ON DELETE SET NULL ON UPDATE CASCADE`.
+*   **Admission to Bill (One-to-Many)**: `Bill.admission_id` references `Admission.id` `ON DELETE SET NULL ON UPDATE CASCADE`.
+
+*   **Prescription to PrescriptionItem (One-to-Many)**: `PrescriptionItem.prescription_id` references `Prescription.id` `ON DELETE CASCADE ON UPDATE CASCADE`.
+*   **Medication to PrescriptionItem (One-to-Many)**: `PrescriptionItem.medication_id` references `Medication.id` `ON DELETE RESTRICT ON UPDATE CASCADE`.
+
+*   **Bill to BillItem (One-to-Many)**: `BillItem.bill_id` references `Bill.id` `ON DELETE CASCADE ON UPDATE CASCADE`.
+
+## Complete CREATE TABLE Statements
+
+```sql
+-- Enable foreign key support for SQLite
+PRAGMA foreign_keys = ON;
+
+-- Table: Patient
+CREATE TABLE Patient (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    date_of_birth DATE NOT NULL,
+    gender VARCHAR(10) NOT NULL,
+    address VARCHAR(255),
+    phone_number VARCHAR(20) NOT NULL UNIQUE,
+    email VARCHAR(100) UNIQUE,
+    blood_group VARCHAR(5),
+    registration_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_patient_first_last_name ON Patient(first_name, last_name);
+CREATE INDEX idx_patient_phone_number ON Patient(phone_number);
+CREATE INDEX idx_patient_email ON Patient(email);
+
+-- Table: Department
+CREATE TABLE Department (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    department_name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_department_name ON Department(department_name);
+
+-- Table: Doctor
+CREATE TABLE Doctor (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    specialization VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(20) UNIQUE,
+    email VARCHAR(100) UNIQUE,
+    license_number VARCHAR(50) NOT NULL UNIQUE,
+    department_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (department_id) REFERENCES Department(id) ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+CREATE INDEX idx_doctor_first_last_name ON Doctor(first_name, last_name);
+CREATE INDEX idx_doctor_specialization ON Doctor(specialization);
+CREATE INDEX idx_doctor_department_id ON Doctor(department_id);
+CREATE INDEX idx_doctor_license_number ON Doctor(license_number);
+
+-- Table: Staff
+CREATE TABLE Staff (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    role VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(20) UNIQUE,
+    email VARCHAR(100) UNIQUE,
+    department_id INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (department_id) REFERENCES Department(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE INDEX idx_staff_department_id ON Staff(department_id);
+CREATE INDEX idx_staff_phone_number ON Staff(phone_number);
+CREATE INDEX idx_staff_email ON Staff(email);
+
+-- Table: Room
+CREATE TABLE Room (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_number VARCHAR(10) NOT NULL UNIQUE,
+    room_type VARCHAR(50) NOT NULL,
+    capacity INTEGER NOT NULL DEFAULT 1,
+    current_occupancy INTEGER NOT NULL DEFAULT 0,
+    is_available BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CHECK (current_occupancy >= 0 AND current_occupancy <= capacity)
+);
+
+CREATE INDEX idx_room_number ON Room(room_number);
+
+-- Table: Admission
+CREATE TABLE Admission (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    patient_id INTEGER NOT NULL,
+    admission_date TIMESTAMP NOT NULL,
+    discharge_date TIMESTAMP,
+    room_id INTEGER,
+    admitting_doctor_id INTEGER NOT NULL,
+    initial_diagnosis TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES Patient(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (room_id) REFERENCES Room(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (admitting_doctor_id) REFERENCES Doctor(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CHECK (discharge_date IS NULL OR discharge_date >= admission_date)
+);
+
+CREATE INDEX idx_admission_patient_id ON Admission(patient_id);
+CREATE INDEX idx_admission_room_id ON Admission(room_id);
+CREATE INDEX idx_admission_admitting_doctor_id ON Admission(admitting_doctor_id);
+CREATE INDEX idx_admission_dates ON Admission(admission_date, discharge_date);
+
+-- Table: Appointment
+CREATE TABLE Appointment (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    patient_id INTEGER NOT NULL,
+    doctor_id INTEGER NOT NULL,
+    appointment_date_time TIMESTAMP NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'Scheduled',
+    reason_for_visit TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES Patient(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES Doctor(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    UNIQUE (doctor_id, appointment_date_time)
+);
+
+CREATE INDEX idx_appointment_patient_id ON Appointment(patient_id);
+CREATE INDEX idx_appointment_doctor_id ON Appointment(doctor_id);
+
+-- Table: MedicalRecord
+CREATE TABLE MedicalRecord (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    patient_id INTEGER NOT NULL,
+    doctor_id INTEGER NOT NULL,
+    record_date_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    admission_id INTEGER,
+    diagnosis TEXT NOT NULL,
+    treatment TEXT,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES Patient(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES Doctor(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (admission_id) REFERENCES Admission(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE INDEX idx_medical_record_patient_id ON MedicalRecord(patient_id);
+CREATE INDEX idx_medical_record_doctor_id ON MedicalRecord(doctor_id);
+CREATE INDEX idx_medical_record_admission_id ON MedicalRecord(admission_id);
+CREATE INDEX idx_medical_record_date_time ON MedicalRecord(record_date_time);
+
+-- Table: Medication
+CREATE TABLE Medication (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    medication_name VARCHAR(255) NOT NULL UNIQUE,
+    generic_name VARCHAR(255),
+    description TEXT,
+    stock_quantity INTEGER NOT NULL DEFAULT 0,
+    unit_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CHECK (stock_quantity >= 0),
+    CHECK (unit_price >= 0.00)
+);
+
+CREATE INDEX idx_medication_name ON Medication(medication_name);
+
+-- Table: Prescription
+CREATE TABLE Prescription (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    patient_id INTEGER NOT NULL,
+    doctor_id INTEGER NOT NULL,
+    prescription_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES Patient(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES Doctor(id) ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+CREATE INDEX idx_prescription_patient_id ON Prescription(patient_id);
+CREATE INDEX idx_prescription_doctor_id ON Prescription(doctor_id);
+CREATE INDEX idx_prescription_date ON Prescription(prescription_date);
+
+-- Table: PrescriptionItem
+CREATE TABLE PrescriptionItem (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    prescription_id INTEGER NOT NULL,
+    medication_id INTEGER NOT NULL,
+    dosage VARCHAR(100) NOT NULL,
+    frequency VARCHAR(100) NOT NULL,
+    duration VARCHAR(100),
+    quantity_prescribed INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (prescription_id) REFERENCES Prescription(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (medication_id) REFERENCES Medication(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    UNIQUE (prescription_id, medication_id),
+    CHECK (quantity_prescribed > 0)
+);
+
+CREATE INDEX idx_prescription_item_prescription_id ON PrescriptionItem(prescription_id);
+CREATE INDEX idx_prescription_item_medication_id ON PrescriptionItem(medication_id);
+
+-- Table: Bill
+CREATE TABLE Bill (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    patient_id INTEGER NOT NULL,
+    admission_id INTEGER,
+    bill_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    total_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    amount_paid DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    due_date DATE,
+    payment_status VARCHAR(50) NOT NULL DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES Patient(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (admission_id) REFERENCES Admission(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CHECK (total_amount >= 0.00),
+    CHECK (amount_paid >= 0.00 AND amount_paid <= total_amount)
+);
+
+CREATE INDEX idx_bill_patient_id ON Bill(patient_id);
+CREATE INDEX idx_bill_admission_id ON Bill(admission_id);
+CREATE INDEX idx_bill_date ON Bill(bill_date);
+CREATE INDEX idx_bill_payment_status ON Bill(payment_status);
+
+-- Table: BillItem
+CREATE TABLE BillItem (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    bill_id INTEGER NOT NULL,
+    service_description VARCHAR(255) NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    item_amount DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (bill_id) REFERENCES Bill(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CHECK (quantity > 0),
+    CHECK (unit_price >= 0.00),
+    CHECK (item_amount = quantity * unit_price)
+);
+
+CREATE INDEX idx_bill_item_bill_id ON BillItem(bill_id);

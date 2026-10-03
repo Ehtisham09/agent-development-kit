@@ -1,0 +1,431 @@
+Database Requirements Document - School Management System
+
+1. Introduction
+This document outlines the relational database schema for a School Management System. The system aims to manage student, teacher, course, class, enrollment, assignment, and grading information efficiently. The design adheres to relational database principles, focusing on data integrity, normalization, and performance.
+
+2. Entity-Relationship Model Overview
+The system comprises several key entities:
+*   Users: For system authentication and authorization.
+*   Departments: Organizational units within the school.
+*   Teachers: Educators affiliated with departments.
+*   Students: Learners enrolled in the school.
+*   Subjects: Broad academic categories.
+*   Courses: Specific educational offerings under subjects.
+*   Rooms: Physical locations for classes.
+*   Classes: Specific instances of courses with assigned teachers and rooms.
+*   Enrollments: Links students to classes they attend.
+*   Assignments: Tasks given in classes.
+*   Grades: Scores students receive on assignments.
+
+3. Table Definitions
+
+---
+Table: `Users`
+*   Purpose: Stores user authentication and authorization information for access to the system.
+*   Columns:
+    *   `UserID` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the user.
+    *   `Username` (VARCHAR(50), UNIQUE, NOT NULL): Unique login username.
+    *   `PasswordHash` (VARCHAR(255), NOT NULL): Hashed password for security.
+    *   `Email` (VARCHAR(100), UNIQUE): User's email address (optional, but unique if present).
+    *   `UserType` (ENUM('Student', 'Teacher', 'Admin'), NOT NULL): Role of the user in the system.
+    *   `CreatedAt` (DATETIME, DEFAULT CURRENT_TIMESTAMP): Timestamp of user creation.
+    *   `UpdatedAt` (DATETIME, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP): Timestamp of last update.
+*   Constraints:
+    *   `PRIMARY KEY (UserID)`
+    *   `UNIQUE (Username)`
+    *   `UNIQUE (Email)`
+    *   `NOT NULL (Username, PasswordHash, UserType)`
+*   Indexes: `UserID` (PK), `Username` (Unique), `Email` (Unique)
+
+---
+Table: `Departments`
+*   Purpose: Stores information about academic departments.
+*   Columns:
+    *   `DepartmentID` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the department.
+    *   `DepartmentName` (VARCHAR(100), UNIQUE, NOT NULL): Name of the department (e.g., "Mathematics", "Science").
+    *   `HeadOfDepartmentID` (INT, FOREIGN KEY, NULLABLE): References `TeacherID` of the teacher heading the department.
+    *   `Description` (TEXT): A brief description of the department.
+*   Constraints:
+    *   `PRIMARY KEY (DepartmentID)`
+    *   `UNIQUE (DepartmentName)`
+    *   `FOREIGN KEY (HeadOfDepartmentID) REFERENCES Teachers(TeacherID)`
+    *   `NOT NULL (DepartmentName)`
+*   Indexes: `DepartmentID` (PK), `DepartmentName` (Unique), `HeadOfDepartmentID` (FK)
+
+---
+Table: `Teachers`
+*   Purpose: Stores personal and employment details of teachers.
+*   Columns:
+    *   `TeacherID` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the teacher.
+    *   `UserID` (INT, FOREIGN KEY, UNIQUE, NOT NULL): Links to the `Users` table for authentication.
+    *   `FirstName` (VARCHAR(50), NOT NULL): Teacher's first name.
+    *   `LastName` (VARCHAR(50), NOT NULL): Teacher's last name.
+    *   `DateOfBirth` (DATE): Teacher's date of birth.
+    *   `Gender` (ENUM('Male', 'Female', 'Other')): Teacher's gender.
+    *   `Address` (VARCHAR(255)): Teacher's residential address.
+    *   `PhoneNumber` (VARCHAR(20)): Teacher's contact phone number.
+    *   `Email` (VARCHAR(100), UNIQUE): Teacher's professional email.
+    *   `HireDate` (DATE, NOT NULL): Date the teacher was hired.
+    *   `DepartmentID` (INT, FOREIGN KEY, NULLABLE): References the department the teacher belongs to.
+    *   `Salary` (DECIMAL(10, 2)): Teacher's annual salary.
+*   Constraints:
+    *   `PRIMARY KEY (TeacherID)`
+    *   `UNIQUE (UserID)`
+    *   `UNIQUE (Email)`
+    *   `NOT NULL (UserID, FirstName, LastName, HireDate)`
+    *   `FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE ON UPDATE CASCADE`
+    *   `FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID) ON DELETE SET NULL ON UPDATE CASCADE`
+*   Indexes: `TeacherID` (PK), `UserID` (Unique, FK), `Email` (Unique), `DepartmentID` (FK), `LastName`
+
+---
+Table: `Students`
+*   Purpose: Stores personal and academic details of students.
+*   Columns:
+    *   `StudentID` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the student.
+    *   `UserID` (INT, FOREIGN KEY, UNIQUE, NOT NULL): Links to the `Users` table for authentication.
+    *   `FirstName` (VARCHAR(50), NOT NULL): Student's first name.
+    *   `LastName` (VARCHAR(50), NOT NULL): Student's last name.
+    *   `DateOfBirth` (DATE): Student's date of birth.
+    *   `Gender` (ENUM('Male', 'Female', 'Other')): Student's gender.
+    *   `Address` (VARCHAR(255)): Student's residential address.
+    *   `PhoneNumber` (VARCHAR(20)): Student's contact phone number.
+    *   `Email` (VARCHAR(100), UNIQUE): Student's personal email.
+    *   `EnrollmentDate` (DATE, NOT NULL): Date the student enrolled in the school.
+    *   `GradeLevel` (INT): Current academic grade level (e.g., 9, 10, 11, 12).
+    *   `GuardianName` (VARCHAR(100)): Name of the student's guardian.
+    *   `GuardianPhone` (VARCHAR(20)): Guardian's contact phone number.
+*   Constraints:
+    *   `PRIMARY KEY (StudentID)`
+    *   `UNIQUE (UserID)`
+    *   `UNIQUE (Email)`
+    *   `NOT NULL (UserID, FirstName, LastName, EnrollmentDate)`
+    *   `FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE ON UPDATE CASCADE`
+*   Indexes: `StudentID` (PK), `UserID` (Unique, FK), `Email` (Unique), `LastName`
+
+---
+Table: `Subjects`
+*   Purpose: Defines academic subjects offered (e.g., Mathematics, History, Physics).
+*   Columns:
+    *   `SubjectID` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the subject.
+    *   `SubjectName` (VARCHAR(100), UNIQUE, NOT NULL): Name of the subject.
+    *   `Description` (TEXT): Detailed description of the subject.
+    *   `DepartmentID` (INT, FOREIGN KEY, NULLABLE): References the department offering the subject.
+*   Constraints:
+    *   `PRIMARY KEY (SubjectID)`
+    *   `UNIQUE (SubjectName)`
+    *   `NOT NULL (SubjectName)`
+    *   `FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID) ON DELETE SET NULL ON UPDATE CASCADE`
+*   Indexes: `SubjectID` (PK), `SubjectName` (Unique), `DepartmentID` (FK)
+
+---
+Table: `Courses`
+*   Purpose: Defines specific courses (e.g., "Algebra I", "World History II") within subjects.
+*   Columns:
+    *   `CourseID` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the course.
+    *   `CourseCode` (VARCHAR(20), UNIQUE, NOT NULL): Unique code for the course (e.g., "MATH101", "HIS203").
+    *   `CourseName` (VARCHAR(100), NOT NULL): Full name of the course.
+    *   `SubjectID` (INT, FOREIGN KEY, NOT NULL): References the subject this course belongs to.
+    *   `Credits` (INT, NOT NULL): Number of academic credits for the course.
+    *   `Description` (TEXT): Detailed description of the course content.
+    *   `MaxStudents` (INT): Maximum number of students allowed in any section of this course.
+*   Constraints:
+    *   `PRIMARY KEY (CourseID)`
+    *   `UNIQUE (CourseCode)`
+    *   `NOT NULL (CourseCode, CourseName, SubjectID, Credits)`
+    *   `CHECK (Credits > 0)`
+    *   `CHECK (MaxStudents > 0)`
+    *   `FOREIGN KEY (SubjectID) REFERENCES Subjects(SubjectID) ON DELETE RESTRICT ON UPDATE CASCADE`
+*   Indexes: `CourseID` (PK), `CourseCode` (Unique), `SubjectID` (FK)
+
+---
+Table: `Rooms`
+*   Purpose: Stores information about physical school rooms.
+*   Columns:
+    *   `RoomID` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the room.
+    *   `RoomNumber` (VARCHAR(10), UNIQUE, NOT NULL): Unique room number (e.g., "A101", "Lab-2").
+    *   `Capacity` (INT, NOT NULL): Maximum seating capacity of the room.
+    *   `Type` (VARCHAR(50)): Type of room (e.g., 'Classroom', 'Lab', 'Auditorium').
+*   Constraints:
+    *   `PRIMARY KEY (RoomID)`
+    *   `UNIQUE (RoomNumber)`
+    *   `NOT NULL (RoomNumber, Capacity)`
+    *   `CHECK (Capacity > 0)`
+*   Indexes: `RoomID` (PK), `RoomNumber` (Unique)
+
+---
+Table: `Classes`
+*   Purpose: Represents specific offerings (sections) of a course with assigned teacher, room, and schedule.
+*   Columns:
+    *   `ClassID` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the class section.
+    *   `CourseID` (INT, FOREIGN KEY, NOT NULL): References the course this class is an instance of.
+    *   `TeacherID` (INT, FOREIGN KEY, NOT NULL): References the teacher assigned to this class.
+    *   `RoomID` (INT, FOREIGN KEY, NOT NULL): References the room where this class is held.
+    *   `Semester` (VARCHAR(20), NOT NULL): Academic semester (e.g., 'Fall 2023', 'Spring 2024').
+    *   `AcademicYear` (INT, NOT NULL): Academic year (e.g., 2023).
+    *   `StartTime` (TIME, NOT NULL): Scheduled start time of the class.
+    *   `EndTime` (TIME, NOT NULL): Scheduled end time of the class.
+    *   `DaysOfWeek` (VARCHAR(15), NOT NULL): Days the class meets (e.g., 'MWF', 'TT', 'M-F').
+    *   `MaxCapacity` (INT): Override for maximum student capacity for this specific class. If NULL, defaults to `Courses.MaxStudents`.
+*   Constraints:
+    *   `PRIMARY KEY (ClassID)`
+    *   `NOT NULL (CourseID, TeacherID, RoomID, Semester, AcademicYear, StartTime, EndTime, DaysOfWeek)`
+    *   `FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) ON DELETE RESTRICT ON UPDATE CASCADE`
+    *   `FOREIGN KEY (TeacherID) REFERENCES Teachers(TeacherID) ON DELETE RESTRICT ON UPDATE CASCADE`
+    *   `FOREIGN KEY (RoomID) REFERENCES Rooms(RoomID) ON DELETE RESTRICT ON UPDATE CASCADE`
+    *   `CHECK (EndTime > StartTime)`: Ensures logical time scheduling.
+    *   `UNIQUE (RoomID, Semester, AcademicYear, StartTime, EndTime, DaysOfWeek)`: Prevents multiple classes from being scheduled in the same room at the same time.
+    *   `UNIQUE (TeacherID, Semester, AcademicYear, StartTime, EndTime, DaysOfWeek)`: Prevents a teacher from being scheduled for multiple classes at the same time.
+*   Indexes: `ClassID` (PK), `CourseID` (FK), `TeacherID` (FK), `RoomID` (FK), `Semester`, `AcademicYear`
+
+---
+Table: `Enrollments`
+*   Purpose: Records which student is enrolled in which class. Resolves the many-to-many relationship between Students and Classes.
+*   Columns:
+    *   `EnrollmentID` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the enrollment record.
+    *   `StudentID` (INT, FOREIGN KEY, NOT NULL): References the enrolled student.
+    *   `ClassID` (INT, FOREIGN KEY, NOT NULL): References the class section.
+    *   `EnrollmentDate` (DATETIME, DEFAULT CURRENT_TIMESTAMP): Date and time of enrollment.
+    *   `Grade` (VARCHAR(5)): Final grade received in the class (e.g., 'A', 'B+', 'Pass', 'Fail').
+    *   `Status` (ENUM('Enrolled', 'Withdrawn', 'Completed'), NOT NULL, DEFAULT 'Enrolled'): Current status of the enrollment.
+*   Constraints:
+    *   `PRIMARY KEY (EnrollmentID)`
+    *   `NOT NULL (StudentID, ClassID, Status)`
+    *   `FOREIGN KEY (StudentID) REFERENCES Students(StudentID) ON DELETE CASCADE ON UPDATE CASCADE`
+    *   `FOREIGN KEY (ClassID) REFERENCES Classes(ClassID) ON DELETE CASCADE ON UPDATE CASCADE`
+    *   `UNIQUE (StudentID, ClassID)`: A student can enroll in a specific class only once.
+*   Indexes: `EnrollmentID` (PK), `StudentID` (FK), `ClassID` (FK)
+
+---
+Table: `Assignments`
+*   Purpose: Defines assignments given for a specific class.
+*   Columns:
+    *   `AssignmentID` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the assignment.
+    *   `ClassID` (INT, FOREIGN KEY, NOT NULL): References the class to which this assignment belongs.
+    *   `AssignmentName` (VARCHAR(100), NOT NULL): Name of the assignment.
+    *   `Description` (TEXT): Detailed description of the assignment.
+    *   `DueDate` (DATETIME, NOT NULL): Due date and time for the assignment.
+    *   `MaxScore` (DECIMAL(5, 2), NOT NULL): Maximum possible score for the assignment.
+    *   `Weight` (DECIMAL(5, 2), NOT NULL): Percentage weight of this assignment towards the overall class grade (0-100).
+*   Constraints:
+    *   `PRIMARY KEY (AssignmentID)`
+    *   `NOT NULL (ClassID, AssignmentName, DueDate, MaxScore, Weight)`
+    *   `CHECK (MaxScore > 0)`
+    *   `CHECK (Weight >= 0 AND Weight <= 100)`
+    *   `FOREIGN KEY (ClassID) REFERENCES Classes(ClassID) ON DELETE CASCADE ON UPDATE CASCADE`
+*   Indexes: `AssignmentID` (PK), `ClassID` (FK)
+
+---
+Table: `Grades`
+*   Purpose: Records individual student scores for specific assignments. Resolves the many-to-many relationship between Students and Assignments.
+*   Columns:
+    *   `GradeID` (INT, PRIMARY KEY, AUTO_INCREMENT): Unique identifier for the grade record.
+    *   `AssignmentID` (INT, FOREIGN KEY, NOT NULL): References the assignment for which the grade is given.
+    *   `StudentID` (INT, FOREIGN KEY, NOT NULL): References the student who received the grade.
+    *   `Score` (DECIMAL(5, 2), NOT NULL): Score obtained by the student for the assignment.
+    *   `SubmissionDate` (DATETIME): Date and time the assignment was submitted.
+    *   `Feedback` (TEXT): Teacher's feedback on the assignment.
+*   Constraints:
+    *   `PRIMARY KEY (GradeID)`
+    *   `NOT NULL (AssignmentID, StudentID, Score)`
+    *   `CHECK (Score >= 0)`
+    *   `FOREIGN KEY (AssignmentID) REFERENCES Assignments(AssignmentID) ON DELETE CASCADE ON UPDATE CASCADE`
+    *   `FOREIGN KEY (StudentID) REFERENCES Students(StudentID) ON DELETE CASCADE ON UPDATE CASCADE`
+    *   `UNIQUE (AssignmentID, StudentID)`: A student can only have one grade per assignment.
+*   Indexes: `GradeID` (PK), `AssignmentID` (FK), `StudentID` (FK)
+
+4. Relationship Documentation
+
+*   One-to-One Relationships:
+    *   `Users` and `Students`: Each `UserID` in `Users` can be associated with at most one `StudentID` in `Students` (enforced by `UNIQUE (UserID)` in `Students`).
+    *   `Users` and `Teachers`: Each `UserID` in `Users` can be associated with at most one `TeacherID` in `Teachers` (enforced by `UNIQUE (UserID)` in `Teachers`).
+    *   Technical Specification: Implemented by having `UserID` as a `UNIQUE` foreign key in `Students` and `Teachers` tables, referencing `Users.UserID`.
+
+*   One-to-Many Relationships:
+    *   `Departments` to `Teachers`: One department can have many teachers (`Teachers.DepartmentID` references `Departments.DepartmentID`).
+    *   `Departments` to `Subjects`: One department can offer many subjects (`Subjects.DepartmentID` references `Departments.DepartmentID`).
+    *   `Subjects` to `Courses`: One subject can have many courses (`Courses.SubjectID` references `Subjects.SubjectID`).
+    *   `Teachers` to `Classes`: One teacher can teach many classes (`Classes.TeacherID` references `Teachers.TeacherID`).
+    *   `Courses` to `Classes`: One course can have many class sections (`Classes.CourseID` references `Courses.CourseID`).
+    *   `Rooms` to `Classes`: One room can host many classes (at different times) (`Classes.RoomID` references `Rooms.RoomID`).
+    *   `Classes` to `Assignments`: One class can have many assignments (`Assignments.ClassID` references `Classes.ClassID`).
+    *   `Students` to `Enrollments`: One student can be enrolled in many classes (`Enrollments.StudentID` references `Students.StudentID`).
+
+*   Many-to-Many Relationships:
+    *   `Students` and `Classes`: A student can enroll in multiple classes, and a class can have multiple students.
+        *   Resolution: This is resolved by the `Enrollments` junction table, which contains `StudentID` and `ClassID` as foreign keys.
+    *   `Students` and `Assignments`: A student can receive grades for many assignments, and an assignment will have grades for many students.
+        *   Resolution: This is resolved by the `Grades` junction table, which contains `AssignmentID` and `StudentID` as foreign keys.
+
+5. Normalization Level and Design Justifications
+The database schema is designed to conform to the **Third Normal Form (3NF)**.
+
+*   First Normal Form (1NF): All tables have primary keys, and all attributes are atomic (single-valued) with no repeating groups. For example, `DaysOfWeek` in `Classes` is a single string representing days, not a repeating group of day columns.
+*   Second Normal Form (2NF): Achieved because all non-key attributes in each table are fully functionally dependent on the entire primary key. For tables with composite keys (e.g., `Enrollments` - `(StudentID, ClassID)`), `EnrollmentDate`, `Grade`, and `Status` depend on both parts of the key.
+*   Third Normal Form (3NF): Achieved because there are no transitive dependencies; i.e., no non-key attribute is dependent on another non-key attribute. Each non-key attribute directly describes the primary key. For instance, `Student.GradeLevel` directly describes the student, not indirectly through an enrollment.
+
+Justifications for Design Choices:
+*   Separation of Concerns: Entities like `Users`, `Students`, `Teachers`, `Departments`, `Subjects`, `Courses`, `Rooms` are distinct to encapsulate specific data.
+*   Referential Integrity: Foreign keys with `ON DELETE` and `ON UPDATE` actions (`CASCADE`, `SET NULL`, `RESTRICT`) ensure data consistency. For example, deleting a user account will cascade and delete the associated student/teacher record. Restricting deletion of a `Course` if `Classes` still reference it prevents orphaned class records.
+*   Many-to-Many Resolution: Junction tables (`Enrollments`, `Grades`) are used to correctly model many-to-many relationships, adding attributes specific to the relationship itself (e.g., `EnrollmentDate`, `Grade`, `Score`).
+*   Unique Constraints: Applied to ensure uniqueness of business-critical identifiers (`Username`, `Email`, `DepartmentName`, `SubjectName`, `CourseCode`, `RoomNumber`) and to prevent duplicate entries in relationship tables (`(StudentID, ClassID)` in `Enrollments`, `(AssignmentID, StudentID)` in `Grades`).
+*   Check Constraints: Used for data validation (e.g., `Credits > 0`, `MaxScore > 0`, `EndTime > StartTime`, `Weight BETWEEN 0 AND 100`).
+
+6. Indexes and Performance Considerations
+*   Primary Keys: All primary keys are automatically indexed, ensuring fast retrieval of individual records.
+*   Foreign Keys: All foreign key columns are explicitly or implicitly indexed to optimize join operations, which are frequent in relational databases (e.g., finding all classes for a teacher, all students in a class).
+*   Unique Constraints: Columns with unique constraints (`Username`, `Email`, `CourseCode`, `RoomNumber`, etc.) are also automatically indexed, facilitating rapid lookups and ensuring data integrity.
+*   Common Search Fields: `Students.LastName`, `Teachers.LastName` could benefit from additional non-unique indexes if searches are frequently performed using these fields without involving joins (though they are already part of `UserID` for PK).
+*   Compound Indexes: Composite unique constraints on `Classes` table (`(RoomID, Semester, AcademicYear, StartTime, EndTime, DaysOfWeek)` and `(TeacherID, Semester, AcademicYear, StartTime, EndTime, DaysOfWeek)`) efficiently prevent scheduling conflicts and improve search for specific class schedules.
+
+7. SQL CREATE TABLE Statements (Reference)
+
+```sql
+-- Database: SchoolManagementSystem
+
+-- 1. Table: Users
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY AUTO_INCREMENT,
+    Username VARCHAR(50) UNIQUE NOT NULL,
+    PasswordHash VARCHAR(255) NOT NULL,
+    Email VARCHAR(100) UNIQUE,
+    UserType ENUM('Student', 'Teacher', 'Admin') NOT NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 2. Table: Departments
+CREATE TABLE Departments (
+    DepartmentID INT PRIMARY KEY AUTO_INCREMENT,
+    DepartmentName VARCHAR(100) UNIQUE NOT NULL,
+    HeadOfDepartmentID INT NULL, -- FK to Teachers, can be NULL initially, updated after Teachers table is created
+    Description TEXT
+);
+
+-- 3. Table: Teachers
+CREATE TABLE Teachers (
+    TeacherID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID INT UNIQUE NOT NULL, -- One-to-one relationship with Users
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    DateOfBirth DATE,
+    Gender ENUM('Male', 'Female', 'Other'),
+    Address VARCHAR(255),
+    PhoneNumber VARCHAR(20),
+    Email VARCHAR(100) UNIQUE,
+    HireDate DATE NOT NULL,
+    DepartmentID INT, -- FK to Departments
+    Salary DECIMAL(10, 2),
+    CONSTRAINT fk_teacher_user FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_teacher_department FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- Update Departments table to add the foreign key constraint to Teachers after Teachers table is created
+ALTER TABLE Departments
+ADD CONSTRAINT fk_department_head
+FOREIGN KEY (HeadOfDepartmentID) REFERENCES Teachers(TeacherID) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- 4. Table: Students
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID INT UNIQUE NOT NULL, -- One-to-one relationship with Users
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    DateOfBirth DATE,
+    Gender ENUM('Male', 'Female', 'Other'),
+    Address VARCHAR(255),
+    PhoneNumber VARCHAR(20),
+    Email VARCHAR(100) UNIQUE,
+    EnrollmentDate DATE NOT NULL,
+    GradeLevel INT, -- e.g., 1-12
+    GuardianName VARCHAR(100),
+    GuardianPhone VARCHAR(20),
+    CONSTRAINT fk_student_user FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- 5. Table: Subjects
+CREATE TABLE Subjects (
+    SubjectID INT PRIMARY KEY AUTO_INCREMENT,
+    SubjectName VARCHAR(100) UNIQUE NOT NULL,
+    Description TEXT,
+    DepartmentID INT, -- FK to Departments
+    CONSTRAINT fk_subject_department FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- 6. Table: Courses
+CREATE TABLE Courses (
+    CourseID INT PRIMARY KEY AUTO_INCREMENT,
+    CourseCode VARCHAR(20) UNIQUE NOT NULL,
+    CourseName VARCHAR(100) NOT NULL,
+    SubjectID INT NOT NULL, -- FK to Subjects
+    Credits INT NOT NULL CHECK (Credits > 0),
+    Description TEXT,
+    MaxStudents INT CHECK (MaxStudents > 0),
+    CONSTRAINT fk_course_subject FOREIGN KEY (SubjectID) REFERENCES Subjects(SubjectID) ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- 7. Table: Rooms
+CREATE TABLE Rooms (
+    RoomID INT PRIMARY KEY AUTO_INCREMENT,
+    RoomNumber VARCHAR(10) UNIQUE NOT NULL,
+    Capacity INT NOT NULL CHECK (Capacity > 0),
+    Type VARCHAR(50) -- e.g., 'Classroom', 'Lab', 'Auditorium'
+);
+
+-- 8. Table: Classes
+CREATE TABLE Classes (
+    ClassID INT PRIMARY KEY AUTO_INCREMENT,
+    CourseID INT NOT NULL, -- FK to Courses
+    TeacherID INT NOT NULL, -- FK to Teachers
+    RoomID INT NOT NULL, -- FK to Rooms
+    Semester VARCHAR(20) NOT NULL, -- e.g., 'Fall 2023', 'Spring 2024'
+    AcademicYear INT NOT NULL, -- e.g., 2023, 2024
+    StartTime TIME NOT NULL,
+    EndTime TIME NOT NULL,
+    DaysOfWeek VARCHAR(15) NOT NULL, -- e.g., 'MWF', 'TT', 'M-F'
+    MaxCapacity INT, -- Specific capacity for this class instance, can override Course.MaxStudents
+    CONSTRAINT fk_class_course FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_class_teacher FOREIGN KEY (TeacherID) REFERENCES Teachers(TeacherID) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_class_room FOREIGN KEY (RoomID) REFERENCES Rooms(RoomID) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT chk_end_time_after_start_time CHECK (EndTime > StartTime),
+    CONSTRAINT uq_class_room_schedule UNIQUE (RoomID, Semester, AcademicYear, StartTime, EndTime, DaysOfWeek),
+    CONSTRAINT uq_class_teacher_schedule UNIQUE (TeacherID, Semester, AcademicYear, StartTime, EndTime, DaysOfWeek)
+);
+
+-- 9. Table: Enrollments
+CREATE TABLE Enrollments (
+    EnrollmentID INT PRIMARY KEY AUTO_INCREMENT,
+    StudentID INT NOT NULL, -- FK to Students
+    ClassID INT NOT NULL, -- FK to Classes
+    EnrollmentDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    Grade VARCHAR(5), -- Final grade for the class
+    Status ENUM('Enrolled', 'Withdrawn', 'Completed') NOT NULL DEFAULT 'Enrolled',
+    CONSTRAINT fk_enrollment_student FOREIGN KEY (StudentID) REFERENCES Students(StudentID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_enrollment_class FOREIGN KEY (ClassID) REFERENCES Classes(ClassID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT uq_student_class UNIQUE (StudentID, ClassID)
+);
+
+-- 10. Table: Assignments
+CREATE TABLE Assignments (
+    AssignmentID INT PRIMARY KEY AUTO_INCREMENT,
+    ClassID INT NOT NULL, -- FK to Classes
+    AssignmentName VARCHAR(100) NOT NULL,
+    Description TEXT,
+    DueDate DATETIME NOT NULL,
+    MaxScore DECIMAL(5, 2) NOT NULL CHECK (MaxScore > 0),
+    Weight DECIMAL(5, 2) NOT NULL CHECK (Weight >= 0 AND Weight <= 100),
+    CONSTRAINT fk_assignment_class FOREIGN KEY (ClassID) REFERENCES Classes(ClassID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- 11. Table: Grades
+CREATE TABLE Grades (
+    GradeID INT PRIMARY KEY AUTO_INCREMENT,
+    AssignmentID INT NOT NULL, -- FK to Assignments
+    StudentID INT NOT NULL, -- FK to Students
+    Score DECIMAL(5, 2) NOT NULL CHECK (Score >= 0),
+    SubmissionDate DATETIME,
+    Feedback TEXT,
+    CONSTRAINT fk_grade_assignment FOREIGN KEY (AssignmentID) REFERENCES Assignments(AssignmentID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_grade_student FOREIGN KEY (StudentID) REFERENCES Students(StudentID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT uq_assignment_student_grade UNIQUE (AssignmentID, StudentID)
+);
+```

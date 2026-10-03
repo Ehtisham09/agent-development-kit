@@ -1,0 +1,1 @@
+This agent takes the comprehensive database design specification from the designer agent and generates a production-ready SQLite database file. It parses the design system, creates all necessary SQL statements for tables with proper constraints and relationships, generates indexes for performance optimization, and produces a complete .sqlite database file ready for immediate use.
