@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Engineer Portfolio | [AI Engineer's Name] | Machine Learning & Deep Learning Expert</title>
+    <meta name="description" content="[AI Engineer's Name]'s professional portfolio showcasing expertise in Machine Learning, Deep Learning, Computer Vision, and AI innovation.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;500;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0V4LLanw2qksYuRlEzO+tcaEPQogQ0KaoIF2g/yI0t5lPNqdk9+j8xV4aWQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary-color: #007BFF;
+            --secondary-color: #20C997;
+            --background-light-gray: #F8F9FA;
+            --text-dark-neutral: #212529;
+            --subtle-gray: #DEE2E6;
+            --white: #FFFFFF;
+
+            /* Spacing Units */
+            --spacing-small: 8px;
+            --spacing-medium: 16px;
+            --spacing-large: 24px;
+            --spacing-x-large: 32px;
+            --spacing-xx-large: 48px;
+            --spacing-xxx-large: 64px;
+
+            --container-max-width: 1200px;
+            --grid-gap: var(--spacing-x-large);
+
+            --default-transition: all 0.3s ease-in-out;
+        }
+
+        /* Base Styles */
+        body {
+            font-family: 'Lato', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-dark-neutral);
+            background-color: var(--background-light-gray);
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-dark-neutral);
+            margin-top: 0;
+            margin-bottom: var(--spacing-medium);
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 36px;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        h4 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        p {
+            margin-bottom: var(--spacing-medium);
+        }
+
+        small, .text-small {
+            font-size: 14px;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--default-transition);
+        }
+
+        a:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        /* Layout & Spacing */
+        .container {
+            max-width: var(--container-max-width);
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: var(--spacing-medium);
+            padding-right: var(--spacing-medium);
+        }
+
+        .section-padding {
+            padding-top: var(--spacing-xxx-large);
+            padding-bottom: var(--spacing-xxx-large);
+        }
+
+        /* Core Component Styles */
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--default-transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0069D9; /* Darken primary color by 10% */
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary-color);
+            color: var(--white);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        .card {
+            background-color: var(--white);
+            padding: var(--spacing-large);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: var(--default-transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-x-large);
+        }
+
+        .form-label {
+            display: block;
+            font-size: 16px;
+            color: var(--text-dark-neutral);
+            margin-bottom: var(--spacing-small);
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: var(--spacing-medium);
+            border: 1px solid var(--subtle-gray);
+            border-radius: 8px;
+            font-family: 'Lato', sans-serif;
+            font-size: 16px;
+            color: var(--text-dark-neutral);
+            background-color: var(--white);
+            box-sizing: border-box; /* Ensures padding doesn't increase width */
+            transition: var(--default-transition);
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: #ADB5BD; /* Subtle Gray */
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .icon {
+            color: var(--primary-color);
+        }
+
+        .social-icon {
+            color: var(--text-dark-neutral);
+            font-size: 32px;
+        }
+
+        .social-icon:hover {
+            color: var(--primary-color);
+        }
+
+        /* Section Specific Styles */
+
+        /* Header */
+        .main-header {
+            background-color: var(--white);
+            padding: var(--spacing-medium) 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .main-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        .logo {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-dark-neutral);
+            text-decoration: none;
+        }
+
+        .main-nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: var(--spacing-large);
+        }
+
+        .main-nav a {
+            color: var(--text-dark-neutral);
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .main-nav a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-toggle {
+            display: none; /* Hidden by default on desktop */
+            font-size: 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-dark-neutral);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://via.placeholder.com/1920x1080/000000/FFFFFF?text=AI+Tech+Background'); /* Placeholder image */
+            background-size: cover;
+            background-position: center;
+            color: var(--white);
+            position: relative;
+            padding: var(--spacing-large); /* Add padding for smaller screens */
+            box-sizing: border-box;
+        }
+
+        .hero-content {
+            max-width: 900px;
+        }
+
+        .hero-section h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: var(--spacing-medium);
+            color: var(--white);
+        }
+
+        .hero-section h3 {
+            font-size: 24px;
+            font-weight: 600;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: var(--spacing-x-large);
+            color: var(--white);
+        }
+
+        /* About Section */
+        .about-section h2,
+        .skills-section h2,
+        .portfolio-section h2,
+        .achievements-section h2,
+        .testimonials-section h2,
+        .contact-section h2 {
+            text-align: center;
+            margin-bottom: var(--spacing-xxx-large);
+            color: var(--text-dark-neutral);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: var(--spacing-xxx-large);
+            align-items: center;
+        }
+
+        .about-image {
+            text-align: center;
+        }
+
+        .about-image img {
+            max-width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .about-text p {
+            color: var(--text-dark-neutral);
+            margin-bottom: var(--spacing-medium);
+        }
+
+        /* Skills Section */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--grid-gap);
+        }
+
+        .skill-category .card {
+            height: 100%; /* Ensure cards are same height */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .skill-category h3 {
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-large);
+        }
+
+        .skill-category ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .skill-category li {
+            font-size: 16px;
+            color: var(--text-dark-neutral);
+            margin-bottom: var(--spacing-small);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-small);
+        }
+
+        .skill-category li::before {
+            content: "•"; /* Custom bullet */
+            color: var(--secondary-color);
+            font-size: 1.2em;
+            line-height: 1;
+        }
+
+
+        /* Portfolio Section */
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--grid-gap);
+        }
+
+        .project-card .card {
+            padding: 0; /* Card handles padding internally */
+            display: flex;
+            flex-direction: column;
+            height: 100%; /* Ensure cards are same height */
+        }
+
+        .project-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            margin-bottom: var(--spacing-large);
+        }
+
+        .project-card-content {
+            padding: 0 var(--spacing-large) var(--spacing-large);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .project-card h3 {
+            color: var(--text-dark-neutral);
+            margin-bottom: var(--spacing-medium);
+        }
+
+        .project-card p {
+            font-size: 16px;
+            color: var(--text-dark-neutral);
+            margin-bottom: var(--spacing-medium);
+        }
+
+        .project-card .technologies {
+            font-size: 14px;
+            color: #6C757D; /* Subtle Gray for technologies */
+            display: block;
+            margin-top: auto; /* Push to bottom */
+            margin-bottom: var(--spacing-large);
+        }
+
+        .project-card .btn-secondary {
+            align-self: flex-start; /* Align button to start */
+        }
+
+
+        /* Project Detail Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--default-transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: var(--spacing-x-large);
+            border-radius: 12px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(20px);
+            transition: var(--default-transition);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: var(--spacing-medium);
+            right: var(--spacing-medium);
+            font-size: 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-dark-neutral);
+            line-height: 1;
+        }
+
+        .modal-content h2 {
+            color: var(--text-dark-neutral);
+            margin-bottom: var(--spacing-x-large);
+            text-align: left;
+        }
+
+        .modal-content h3 {
+            color: var(--text-dark-neutral);
+            margin-top: var(--spacing-x-large);
+            margin-bottom: var(--spacing-medium);
+        }
+
+        .modal-content p, .modal-content ul li {
+            color: var(--text-dark-neutral);
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: var(--spacing-large);
+        }
+
+        .modal-content ul {
+            list-style: disc;
+            padding-left: var(--spacing-large);
+            margin-bottom: var(--spacing-medium);
+        }
+        .modal-content ul li {
+            margin-bottom: var(--spacing-small);
+        }
+
+        /* Achievements Section */
+        .achievements-list .card {
+            margin-bottom: var(--spacing-x-large);
+        }
+
+        .achievements-list .card:last-child {
+            margin-bottom: 0;
+        }
+
+        .achievements-list h3 {
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-small);
+        }
+
+        .achievements-list h4 {
+            color: var(--text-dark-neutral);
+            font-weight: 400;
+            margin-bottom: var(--spacing-small);
+        }
+
+        .achievements-list .dates {
+            font-size: 14px;
+            color: #6C757D; /* Subtle Gray for dates */
+            margin-bottom: var(--spacing-medium);
+            display: block;
+        }
+
+        .achievements-list ul {
+            list-style-type: square;
+            list-style-position: outside;
+            padding-left: var(--spacing-large);
+            margin: 0;
+        }
+
+        .achievements-list ul li {
+            color: var(--text-dark-neutral);
+            margin-bottom: var(--spacing-small);
+        }
+
+        /* Testimonials Section */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--grid-gap);
+        }
+
+        .testimonial-card .card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .testimonial-card .quote-icon {
+            font-size: 32px;
+            color: var(--secondary-color);
+            margin-bottom: var(--spacing-medium);
+            display: block;
+        }
+
+        .testimonial-card p {
+            font-style: italic;
+            color: var(--text-dark-neutral);
+            flex-grow: 1;
+        }
+
+        .testimonial-author-info {
+            display: flex;
+            align-items: center;
+            margin-top: var(--spacing-medium);
+        }
+
+        .testimonial-author-info img {
+            max-width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: var(--spacing-medium);
+        }
+
+        .testimonial-author-details h4 {
+            color: var(--primary-color);
+            margin-bottom: 0;
+        }
+
+        .testimonial-author-details .title-company {
+            font-size: 14px;
+            color: #6C757D; /* Subtle Gray */
+        }
+
+
+        /* Contact Section */
+        .contact-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--spacing-xxx-large);
+        }
+
+        .contact-info p {
+            margin-bottom: var(--spacing-medium);
+        }
+
+        .contact-info a {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-small);
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-medium);
+        }
+
+        .contact-info a:hover {
+            color: var(--secondary-color);
+        }
+
+        .contact-info .social-links {
+            display: flex;
+            gap: var(--spacing-large);
+            margin-top: var(--spacing-x-large);
+        }
+
+        .contact-info .social-links a {
+            color: var(--text-dark-neutral);
+            font-size: 32px;
+        }
+
+        .contact-info .social-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Footer */
+        .main-footer {
+            background-color: #343A40; /* Darker shade of background gray */
+            padding: var(--spacing-x-large) 0;
+            color: var(--white);
+            text-align: center;
+        }
+
+        .main-footer .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            gap: var(--spacing-large);
+        }
+
+        .footer-links a,
+        .footer-social-icons a {
+            color: var(--white);
+            font-size: 14px;
+            text-decoration: none;
+            transition: var(--default-transition);
+        }
+
+        .footer-links a:hover,
+        .footer-social-icons a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-social-icons {
+            display: flex;
+            gap: var(--spacing-medium);
+        }
+
+        .footer-social-icons .icon {
+            font-size: 24px;
+            color: var(--white);
+        }
+
+
+        /* ================== Media Queries ================== */
+
+        /* Mobile (max-width: 768px) */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 36px;
+            }
+
+            h2 {
+                font-size: 28px;
+            }
+
+            .main-header .container {
+                flex-wrap: wrap;
+                height: auto;
+                padding-bottom: var(--spacing-medium);
+            }
+
+            .main-nav {
+                width: 100%;
+                display: none; /* Hidden by default */
+                flex-direction: column;
+                background-color: var(--white);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+                position: absolute;
+                top: 80px;
+                left: 0;
+                right: 0;
+                padding: var(--spacing-medium) 0;
+                z-index: 999;
+            }
+
+            .main-nav.active {
+                display: flex;
+            }
+
+            .nav-toggle {
+                display: block;
+            }
+
+            .header-cta {
+                display: none; /* Hide CTA button on mobile for cleaner header */
+            }
+
+            .hero-section {
+                min-height: 80vh; /* Adjust hero height for mobile */
+                padding: var(--spacing-x-large);
+            }
+
+            .hero-section h3 {
+                font-size: 20px;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr; /* Stack columns */
+                gap: var(--spacing-x-large);
+                text-align: center;
+            }
+
+            .about-image {
+                margin-bottom: var(--spacing-medium);
+            }
+
+            .skills-grid,
+            .portfolio-grid,
+            .testimonials-grid {
+                grid-template-columns: 1fr; /* Stack cards */
+            }
+
+            .contact-content {
+                grid-template-columns: 1fr; /* Stack columns */
+                gap: var(--spacing-x-large);
+            }
+
+            .main-footer .container {
+                flex-direction: column;
+                gap: var(--spacing-medium);
+                text-align: center;
+            }
+
+            .footer-links ul {
+                flex-direction: column;
+                gap: var(--spacing-small);
+            }
+
+            .footer-social-icons {
+                margin-top: var(--spacing-medium);
+            }
+        }
+
+        /* Tablet (max-width: 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            h1 {
+                font-size: 42px;
+            }
+
+            h2 {
+                font-size: 32px;
+            }
+
+            .skills-grid,
+            .portfolio-grid,
+            .testimonials-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 columns for tablet */
+            }
+
+            .about-content {
+                grid-template-columns: 1fr 1.5fr; /* Slightly adjust ratio */
+                gap: var(--spacing-xx-large);
+            }
+
+            .contact-content {
+                grid-template-columns: 1.5fr 1fr; /* Slightly adjust ratio */
+                gap: var(--spacing-xx-large);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ================== Header ================== -->
+    <header class="main-header">
+        <div class="container">
+            <a href="#" class="logo">[AI Engineer's Name]</a>
+            <button class="nav-toggle" aria-label="toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#hero">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#portfolio">Portfolio</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#achievements">Achievements</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+            <a href="#" class="btn btn-primary header-cta">Download Resume</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- ================== Hero Section ================== -->
+        <section id="hero" class="hero-section">
+            <div class="hero-content">
+                <h1>Transforming Data into Intelligent Solutions</h1>
+                <h3>AI Engineer specializing in Machine Learning, Deep Learning, and Computer Vision with a passion for impactful research and development.</h3>
+                <a href="#portfolio" class="btn btn-primary">View My Portfolio</a>
+            </div>
+        </section>
+
+        <!-- ================== About Section ================== -->
+        <section id="about" class="about-section section-padding">
+            <div class="container">
+                <h2>About Me</h2>
+                <div class="about-content">
+                    <div class="about-image">
+                        <img src="https://via.placeholder.com/300x300/007BFF/FFFFFF?text=Professional+Photo" alt="[AI Engineer's Name] Professional Photo">
+                    </div>
+                    <div class="about-text">
+                        <p>A short, engaging biography detailing the engineer's background, passion for AI, key areas of expertise, and career aspirations. Emphasize impact and contribution.</p>
+                        <p>Passionate about leveraging cutting-edge AI technologies to solve complex problems and drive innovation. With a solid foundation in machine learning algorithms, deep learning architectures, and data science principles, I thrive on bringing theoretical concepts to practical, scalable solutions.</p>
+                        <p>My journey in AI has been marked by a continuous pursuit of knowledge and hands-on experience in developing robust models, optimizing performance, and deploying intelligent systems across various domains.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== Skills Section ================== -->
+        <section id="skills" class="skills-section section-padding">
+            <div class="container">
+                <h2>My Expertise</h2>
+                <div class="skills-grid">
+                    <div class="skill-category card">
+                        <h3>Programming Languages</h3>
+                        <ul>
+                            <li>Python</li>
+                            <li>R</li>
+                            <li>Java</li>
+                            <li>C++</li>
+                            <li>Scala</li>
+                        </ul>
+                    </div>
+                    <div class="skill-category card">
+                        <h3>Machine Learning Frameworks</h3>
+                        <ul>
+                            <li>TensorFlow</li>
+                            <li>PyTorch</li>
+                            <li>Scikit-learn</li>
+                            <li>Keras</li>
+                            <li>MXNet</li>
+                        </ul>
+                    </div>
+                    <div class="skill-category card">
+                        <h3>Cloud Platforms</h3>
+                        <ul>
+                            <li>AWS (Sagemaker, EC2)</li>
+                            <li>Google Cloud Platform (AI Platform)</li>
+                            <li>Azure ML</li>
+                        </ul>
+                    </div>
+                    <div class="skill-category card">
+                        <h3>Tools & Technologies</h3>
+                        <ul>
+                            <li>Docker</li>
+                            <li>Kubernetes</li>
+                            <li>Git</li>
+                            <li>SQL, NoSQL</li>
+                            <li>Apache Spark</li>
+                            <li>Airflow</li>
+                        </ul>
+                    </div>
+                    <div class="skill-category card">
+                        <h3>AI Concepts & Domains</h3>
+                        <ul>
+                            <li>Deep Learning</li>
+                            <li>Natural Language Processing (NLP)</li>
+                            <li>Computer Vision</li>
+                            <li>Reinforcement Learning</li>
+                            <li>Data Science</li>
+                            <li>MLOps</li>
+                        </ul>
+                    </div>
+                    <div class="skill-category card">
+                        <h3>Other Skills</h3>
+                        <ul>
+                            <li>Statistical Modeling</li>
+                            <li>Data Visualization</li>
+                            <li>Model Deployment</li>
+                            <li>Algorithm Optimization</li>
+                            <li>Big Data Processing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== Portfolio / Projects Section ================== -->
+        <section id="portfolio" class="portfolio-section section-padding">
+            <div class="container">
+                <h2>Featured Projects</h2>
+                <div class="portfolio-grid">
+                    <div class="project-card">
+                        <div class="card">
+                            <img src="https://via.placeholder.com/400x200/20C997/FFFFFF?text=Project+Thumbnail+1" alt="Project 1 Thumbnail">
+                            <div class="project-card-content">
+                                <h3>Project Title One</h3>
+                                <p>1-2 sentences summarizing the project's purpose and key outcome.</p>
+                                <span class="technologies">Python, PyTorch, AWS Sagemaker</span>
+                                <button class="btn btn-secondary view-project-btn" data-project="project1">View Project Details</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="card">
+                            <img src="https://via.placeholder.com/400x200/007BFF/FFFFFF?text=Project+Thumbnail+2" alt="Project 2 Thumbnail">
+                            <div class="project-card-content">
+                                <h3>Project Title Two</h3>
+                                <p>Brief description of the second project and its impactful results.</p>
+                                <span class="technologies">TensorFlow, Keras, GCP AI Platform</span>
+                                <button class="btn btn-secondary view-project-btn" data-project="project2">View Project Details</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="card">
+                            <img src="https://via.placeholder.com/400x200/F8F9FA/212529?text=Project+Thumbnail+3" alt="Project 3 Thumbnail">
+                            <div class="project-card-content">
+                                <h3>Project Title Three</h3>
+                                <p>Summary of a compelling project, showcasing innovative approaches.</p>
+                                <span class="technologies">Python, Scikit-learn, Docker</span>
+                                <button class="btn btn-secondary view-project-btn" data-project="project3">View Project Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== Project Detail Modal ================== -->
+        <div id="projectModal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+                <h2 id="modalProjectTitle"></h2>
+                <img id="modalProjectImage" src="" alt="Project Image">
+                <h3>Overview</h3>
+                <p id="modalProjectOverview"></p>
+                <h3>Key Contributions</h3>
+                <ul id="modalProjectContributions"></ul>
+                <h3>Technologies Used</h3>
+                <p id="modalProjectTechnologies"></p>
+                <div class="modal-links">
+                    <a href="#" target="_blank" id="modalGithubLink" class="btn btn-secondary" style="margin-right: 10px; margin-bottom: 10px;">GitHub Repo <i class="fab fa-github"></i></a>
+                    <a href="#" target="_blank" id="modalDemoLink" class="btn btn-secondary" style="margin-right: 10px; margin-bottom: 10px;">Live Demo <i class="fas fa-external-link-alt"></i></a>
+                    <a href="#" target="_blank" id="modalPaperLink" class="btn btn-secondary" style="margin-bottom: 10px;">Research Paper <i class="fas fa-file-alt"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================== Achievements / Experience Section ================== -->
+        <section id="achievements" class="achievements-section section-padding">
+            <div class="container">
+                <h2>Experience & Achievements</h2>
+                <div class="achievements-list">
+                    <div class="card">
+                        <h3>Senior AI Engineer</h3>
+                        <h4>Company Name Inc.</h4>
+                        <span class="dates">January 2020 – Present</span>
+                        <ul>
+                            <li>Developed and deployed scalable machine learning models for [specific application], leading to [measurable achievement].</li>
+                            <li>Led a team of AI engineers in designing and implementing [project], resulting in [impact].</li>
+                            <li>Optimized existing AI pipelines, reducing inference time by [percentage] and improving resource utilization.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>M.S. in Artificial Intelligence</h3>
+                        <h4>Prestigious University, City, Country</h4>
+                        <span class="dates">September 2018 – December 2019</span>
+                        <ul>
+                            <li>Specialized in Deep Learning and Natural Language Processing.</li>
+                            <li>Thesis: "[Thesis Title]" - Developed a novel [method] for [problem].</li>
+                            <li>Awarded [Academic Award Name] for outstanding research.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>AWS Certified Machine Learning Specialty</h3>
+                        <h4>Amazon Web Services</h4>
+                        <span class="dates">Year Achieved</span>
+                        <p>Validated expertise in designing, implementing, deploying, and maintaining machine learning solutions on AWS.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Google AI Impact Challenge Winner</h3>
+                        <h4>Google</h4>
+                        <span class="dates">Year Achieved</span>
+                        <p>Recognized for innovative application of AI to address critical societal challenges in [specific area].</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== Testimonials Section (Optional) ================== -->
+        <section id="testimonials" class="testimonials-section section-padding">
+            <div class="container">
+                <h2>What Others Say</h2>
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <div class="card">
+                            <div>
+                                <span class="quote-icon"><i class="fas fa-quote-left"></i></span>
+                                <p>"[AI Engineer's Name] is an exceptional AI engineer with a keen eye for detail and a talent for transforming complex data into actionable insights. Their work on [project] was instrumental to our success."</p>
+                            </div>
+                            <div class="testimonial-author-info">
+                                <img src="https://via.placeholder.com/60x60/DEE2E6/212529?text=Photo" alt="Author Photo">
+                                <div class="testimonial-author-details">
+                                    <h4>Jane Doe</h4>
+                                    <span class="title-company">CTO, Tech Solutions</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="card">
+                            <div>
+                                <span class="quote-icon"><i class="fas fa-quote-left"></i></span>
+                                <p>"I had the pleasure of collaborating with [AI Engineer's Name] on [project]. Their depth of knowledge in deep learning and their problem-solving abilities are truly impressive."</p>
+                            </div>
+                            <div class="testimonial-author-info">
+                                <img src="https://via.placeholder.com/60x60/DEE2E6/212529?text=Photo" alt="Author Photo">
+                                <div class="testimonial-author-details">
+                                    <h4>John Smith</h4>
+                                    <span class="title-company">Lead Data Scientist, Innovate AI</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="card">
+                            <div>
+                                <span class="quote-icon"><i class="fas fa-quote-left"></i></span>
+                                <p>"[AI Engineer's Name] consistently delivers high-quality work, demonstrating strong analytical skills and a proactive approach. A valuable asset to any AI team."</p>
+                            </div>
+                            <div class="testimonial-author-info">
+                                <img src="https://via.placeholder.com/60x60/DEE2E6/212529?text=Photo" alt="Author Photo">
+                                <div class="testimonial-author-details">
+                                    <h4>Emily White</h4>
+                                    <span class="title-company">Senior Researcher, AI Labs</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== Contact Section ================== -->
+        <section id="contact" class="contact-section section-padding">
+            <div class="container">
+                <h2>Let's Connect</h2>
+                <div class="contact-content">
+                    <div class="contact-form-wrapper">
+                        <form class="contact-form" action="#" method="POST">
+                            <div class="form-group">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" id="name" name="name" class="form-input" placeholder="Your Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" name="email" class="form-input" placeholder="your.email@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="subject" class="form-label">Subject</label>
+                                <input type="text" id="subject" name="subject" class="form-input" placeholder="Subject of your message" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="message" class="form-label">Message</label>
+                                <textarea id="message" name="message" class="form-textarea" placeholder="Your message here..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </form>
+                    </div>
+                    <div class="contact-info">
+                        <p>I'm always open to new opportunities, collaborations, and discussions. Feel free to reach out!</p>
+                        <a href="mailto:your.email@example.com"><i class="fas fa-envelope icon"></i> your.email@example.com</a>
+                        <div class="social-links">
+                            <a href="[LinkedIn Profile URL]" target="_blank" aria-label="LinkedIn Profile"><i class="fab fa-linkedin social-icon"></i></a>
+                            <a href="[GitHub Profile URL]" target="_blank" aria-label="GitHub Profile"><i class="fab fa-github social-icon"></i></a>
+                            <a href="[Twitter/X Profile URL]" target="_blank" aria-label="Twitter Profile"><i class="fab fa-twitter social-icon"></i></a>
+                            <a href="[Personal Blog/Medium Profile URL]" target="_blank" aria-label="Personal Blog"><i class="fas fa-blog social-icon"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================== Footer ================== -->
+    <footer class="main-footer">
+        <div class="container">
+            <p class="copyright">Copyright &copy; 2023 [AI Engineer's Name]. All Rights Reserved.</p>
+            <div class="footer-links">
+                <ul>
+                    <li><a href="#hero">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#portfolio">Portfolio</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-social-icons">
+                <a href="[LinkedIn Profile URL]" target="_blank" aria-label="LinkedIn Profile"><i class="fab fa-linkedin icon"></i></a>
+                <a href="[GitHub Profile URL]" target="_blank" aria-label="GitHub Profile"><i class="fab fa-github icon"></i></a>
+                <a href="[Twitter/X Profile URL]" target="_blank" aria-label="Twitter Profile"><i class="fab fa-twitter icon"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                // Close mobile nav if open
+                if (document.body.classList.contains('nav-open')) {
+                    document.body.classList.remove('nav-open');
+                    document.querySelector('.main-nav').classList.remove('active');
+                }
+            });
+        });
+
+        // Mobile Navigation Toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const mainNav = document.querySelector('.main-nav');
+
+        navToggle.addEventListener('click', () => {
+            mainNav.classList.toggle('active');
+            document.body.classList.toggle('nav-open'); // Add a class to body for potential overflow hidden
+        });
+
+        // Project Modal Logic
+        const projectModal = document.getElementById('projectModal');
+        const modalCloseBtn = projectModal.querySelector('.modal-close');
+        const viewProjectBtns = document.querySelectorAll('.view-project-btn');
+
+        const projectData = {
+            project1: {
+                title: "Advanced NLP Chatbot",
+                image: "https://via.placeholder.com/800x450/20C997/FFFFFF?text=Advanced+NLP+Chatbot",
+                overview: "Developed an advanced conversational AI chatbot capable of understanding complex user queries and providing accurate, context-aware responses. Utilized transformer models and fine-tuning on domain-specific datasets.",
+                contributions: [
+                    "Designed and implemented the core dialogue management system.",
+                    "Fine-tuned a pre-trained BERT model for intent recognition and entity extraction.",
+                    "Integrated with a knowledge base for real-time information retrieval."
+                ],
+                technologies: "Python, PyTorch, Hugging Face Transformers, AWS Lambda, DynamoDB",
+                github: "#",
+                demo: "#",
+                paper: "#"
+            },
+            project2: {
+                title: "Real-time Object Detection System",
+                image: "https://via.placeholder.com/800x450/007BFF/FFFFFF?text=Real-time+Object+Detection",
+                overview: "Built a real-time object detection system for surveillance applications, identifying multiple objects with high accuracy and low latency. Employed YOLOv5 architecture and optimized for edge devices.",
+                contributions: [
+                    "Collected and annotated custom datasets for specific object classes.",
+                    "Trained and optimized a YOLOv5 model using transfer learning.",
+                    "Developed a backend API for real-time inference and deployed on a Kubernetes cluster."
+                ],
+                technologies: "Python, TensorFlow, Keras, OpenCV, Docker, Kubernetes, Google Cloud Vision",
+                github: "#",
+                demo: "#",
+                paper: "#"
+            },
+            project3: {
+                title: "Personalized Recommendation Engine",
+                image: "https://via.placeholder.com/800x450/F8F9FA/212529?text=Recommendation+Engine",
+                overview: "Designed and implemented a personalized recommendation engine for an e-commerce platform, increasing user engagement and conversion rates through tailored product suggestions.",
+                contributions: [
+                    "Developed collaborative filtering and content-based filtering algorithms.",
+                    "Integrated matrix factorization techniques for improved recommendation accuracy.",
+                    "Performed A/B testing to evaluate the impact of the recommendation system on user metrics."
+                ],
+                technologies: "Python, Scikit-learn, Pandas, Apache Spark, PostgreSQL",
+                github: "#",
+                demo: "#",
+                paper: "#"
+            }
+        };
+
+        viewProjectBtns.forEach(button => {
+            button.addEventListener('click', function() {
+                const projectId = this.dataset.project;
+                const project = projectData[projectId];
+
+                if (project) {
+                    document.getElementById('modalProjectTitle').textContent = project.title;
+                    document.getElementById('modalProjectImage').src = project.image;
+                    document.getElementById('modalProjectImage').alt = project.title + " Image";
+                    document.getElementById('modalProjectOverview').textContent = project.overview;
+
+                    const contributionsList = document.getElementById('modalProjectContributions');
+                    contributionsList.innerHTML = ''; // Clear previous items
+                    project.contributions.forEach(item => {
+                        const li = document.createElement('li');
+                        li.textContent = item;
+                        contributionsList.appendChild(li);
+                    });
+
+                    document.getElementById('modalProjectTechnologies').textContent = project.technologies;
+
+                    document.getElementById('modalGithubLink').href = project.github || '#';
+                    document.getElementById('modalDemoLink').href = project.demo || '#';
+                    document.getElementById('modalPaperLink').href = project.paper || '#';
+
+                    projectModal.classList.add('active');
+                    document.body.style.overflow = 'hidden'; // Prevent scrolling background
+                }
+            });
+        });
+
+        modalCloseBtn.addEventListener('click', () => {
+            projectModal.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scrolling
+        });
+
+        // Close modal when clicking outside content
+        projectModal.addEventListener('click', (e) => {
+            if (e.target === projectModal) {
+                projectModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && projectModal.classList.contains('active')) {
+                projectModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+    </script>
+</body>
+</html>
